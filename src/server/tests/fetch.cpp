@@ -1,18 +1,15 @@
 /*
     date: 2020-08
-    compile: g++ fetch.cpp `sdl2-config --libs` -lSDL2_mixer `taglib-config --libs` `pkg-config --cflags --libs taglib` -lz
+    compile: g++ fetch.cpp -std=c++17 `sdl2-config --libs` -lSDL2_mixer `taglib-config --libs` `pkg-config --cflags --libs taglib` -lz
 */
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
 #include <unistd.h>
-#include <zlib.h>
 #include <taglib/tag.h>
 #include <taglib/fileref.h>
 #include "json.hpp"
 #include <filesystem>
 #include <string>
-#include <iostream>
-#include <stdio.h>
 
 using json = nlohmann::json;
 namespace fs = std::filesystem;
@@ -78,17 +75,6 @@ json createJsonDatabase(std::string path) {
 }
 
 int main() {
-
-    int temp_ret = 0;
-    /* INIT */
-    temp_ret = Mix_Init(MIX_INIT_MP3 | MIX_INIT_FLAC);
-    //printf("Mix_Init: %d\n", temp_ret - (MIX_INIT_MP3 | MIX_INIT_FLAC));
-
-    if(SDL_Init(SDL_INIT_AUDIO)==-1) {
-        printf("SDL_Init: %s\n", SDL_GetError());
-        exit(1);
-    }
-
     json j = createJsonDatabase("musics/");
     std::string s = j.dump(4);
 
@@ -97,10 +83,5 @@ int main() {
     printf("Database created.\n");
 
     /* while(getchar() == 0); */
-    
-    /* CLOSE ALL */
-    Mix_CloseAudio();
-    SDL_Quit();
-    Mix_Quit();
     return 0;
 }
