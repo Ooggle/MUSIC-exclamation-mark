@@ -9,4 +9,10 @@ Listen your music everywhere without using a single Mb of storage.
 
 ![logo](music.png)
 
+## Current development progression
+Linux MUSIC! server: 50%   
+Android player: 30%   
+PC player: 0%   
+Web player: 0%   
+
 For now, it will support mp3, flac and ogg formats. Maybe i will add more in the future. Also, everything is WIP for the moment.
