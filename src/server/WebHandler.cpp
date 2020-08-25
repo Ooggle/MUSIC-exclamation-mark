@@ -90,8 +90,9 @@ int WebHandler::parseRequest(std::string strSource) {
         strcpy(sourceCopy2, source);
         sourceCopy2[groupArray[1].rm_eo] = 0;
         //printf("endpoint: %s\n", sourceCopy2 + groupArray[1].rm_so);
-        lastRequestEndpoint = sourceCopy2 + groupArray[1].rm_so;
-
+        const char *endTemp = sourceCopy2 + groupArray[1].rm_so;
+        lastRequestEndpoint = endTemp;
+        printf("%s %s %s\n", lastRequestEndpoint.c_str(), lastRequestEndpoint.c_str(), lastRequestEndpoint.c_str());
 
         /* 2ND PART */
 
@@ -172,11 +173,15 @@ void WebHandler::handlerLoop() {
         parseRequest(requestHeader.at(0).c_str());
         if(lastRequestStatus == LAST_REQUEST_STATUS::GOOD)
         {
-            if(lastRequestEndpoint == "music") {
+            printf("%s\n", lastRequestEndpoint.c_str());
+            if(lastRequestEndpoint.compare("music") == 0) {
+                printf("music\n");
                 sendMusicFile();
-            } else if(lastRequestEndpoint == "database") {
+            } else if(lastRequestEndpoint.compare("database") == 0) {
+                printf("database\n");
                 sendForbiddenResponse();
             } else {
+                printf("sendForbiddenResponse\n");
                 sendForbiddenResponse();
             }
             
@@ -205,11 +210,11 @@ void WebHandler::sendForbiddenResponse() {
 void WebHandler::sendMusicFile() {
     // file loading
     std::ifstream myFile;
-    myFile.open("musics/sample.mp3", std::ios_base::out | std::ios_base::app | std::ios_base::binary);
+    myFile.open("tests/musics/sample.mp3", std::ios_base::out | std::ios_base::app | std::ios_base::binary);
     if(!myFile.is_open())
         return;
 
-    std::uintmax_t totalFileSize = std::filesystem::file_size("musics/sample.mp3");
+    std::uintmax_t totalFileSize = std::filesystem::file_size("tests/musics/sample.mp3");
     printf("file size : %d\n", totalFileSize);
 
     // header sending
