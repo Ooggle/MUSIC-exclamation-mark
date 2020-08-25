@@ -16,15 +16,15 @@ class JsonDatabase {
         std::string databaseName;
         json databaseContent;
 
+    public:
+        int dbState;
+
         enum DB_STATE {
             NON_INITIALIZED,
             CORRUPTED,
             EMPTY,
             INITIALIZED
         };
-
-    public:
-        int dbState;
 
         JsonDatabase(std::string databaseName);
         ~JsonDatabase();

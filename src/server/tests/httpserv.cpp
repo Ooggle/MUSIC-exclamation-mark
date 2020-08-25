@@ -63,15 +63,15 @@ int regexOne(std::string strSource) {
             char sourceCopy[strlen(source) + 1];
             strcpy(sourceCopy, source);
             sourceCopy[groupArray[g].rm_eo] = 0;
-            printf("Group %u: [%2u-%2u]: %s\n",
+            /* printf("Group %u: [%2u-%2u]: %s\n",
                     g, groupArray[g].rm_so, groupArray[g].rm_eo,
-                    sourceCopy + groupArray[g].rm_so);
+                    sourceCopy + groupArray[g].rm_so); */
 
         }
-        printf("\n");
         char sourceCopy[strlen(source) + 1];
         strcpy(sourceCopy, source);
         sourceCopy[groupArray[2].rm_eo] = 0;
+        printf("param source: %s\n", sourceCopy + groupArray[2].rm_so);
         regexTwo(sourceCopy + groupArray[2].rm_so);
     } else {
         printf("no pattern found\n");
@@ -94,17 +94,12 @@ int regexTwo(std::string paramsSource) {
     size_t maxGroups = 15;
     regmatch_t groupArray[maxGroups];
     unsigned int m;
-    const char *srcConst = paramsSource.c_str();
-    char *source;
-    strcpy(source, srcConst);
+    const char *source = paramsSource.c_str();
 
     regoff_t last_match = 0;
     int Numparams = 0;
     
-    printf("avant\n");
     while(regexec(&reg, source + last_match, maxGroups, groupArray, 0) == 0) {
-        printf("après\n");
-        printf("0\n");
         unsigned int g = 0;
         Numparams += 1;
         for(g = 0; g < maxGroups; g++)
@@ -120,22 +115,16 @@ int regexTwo(std::string paramsSource) {
                     sourceCopy + groupArray[g].rm_so + last_match);*/
             
         }
-        if(groupArray[g].rm_so != (size_t)-1) {
-            printf("1\n");
-            char sourceParamName[strlen(source) + last_match + 1];
-            printf("2\n");
-            strcpy(sourceParamName, source);
-            printf("3\n");
-            sourceParamName[groupArray[1].rm_eo + last_match] = 0;
-            printf("4\n");
+        char sourceParamName[strlen(source) + last_match + 1];
+        strcpy(sourceParamName, source);
+        sourceParamName[groupArray[1].rm_eo + last_match] = 0;
 
-            char sourceParamValue[strlen(source) + last_match + 1];
-            strcpy(sourceParamValue, source);
-            sourceParamValue[groupArray[2].rm_eo + last_match] = 0;
+        char sourceParamValue[strlen(source) + last_match + 1];
+        strcpy(sourceParamValue, source);
+        sourceParamValue[groupArray[2].rm_eo + last_match] = 0;
 
-            printf("5\n");
-            printf("Param %d: %s = %s\n", Numparams, sourceParamName + groupArray[1].rm_so + last_match, sourceParamValue + groupArray[2].rm_so + last_match);
-        }
+        printf("Param %d: %s = %s\n", Numparams, sourceParamName + groupArray[1].rm_so + last_match, sourceParamValue + groupArray[2].rm_so + last_match);
+
         last_match += groupArray[0].rm_so + 1;
     }
 
@@ -154,7 +143,6 @@ int main()
     printf("client connecte\n");
 
 
-    uint8_t data;
     int i = 0;
 
     char getStr[255] = {0};
@@ -173,7 +161,7 @@ int main()
 
 
     // file loading
-    /*std::ifstream myFile;
+    std::ifstream myFile;
     myFile.open("musics/sample.mp3", std::ios_base::out | std::ios_base::app | std::ios_base::binary);
     if(!myFile.is_open())
         return EXIT_FAILURE;
@@ -211,7 +199,7 @@ int main()
         
         leServeur.emettreData((void *)lastBuffer, sizeToRead);
         readedSize += sizeToRead;
-    }*/
+    }
     
     leServeur.deconnecterUnClient();
     leServeur.fermer();
