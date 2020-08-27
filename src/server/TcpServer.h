@@ -33,7 +33,8 @@ class TcpServer {
     void getData(void* data, uint32_t dataMaxSize);
 
     // Send "nbBytes" first bytes of the "data" array to the connected client.
-    void sendData(void* data, uint32_t nbBytes);
+    // return 0 if good, -1 if client disconnected.
+    int sendData(void* data, uint32_t nbBytes);
 
     // Accept a client. Blocking method.
     void connectAClient();

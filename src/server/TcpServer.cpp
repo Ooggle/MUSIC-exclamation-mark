@@ -54,8 +54,11 @@ void TcpServer::getData(void* data, uint32_t dataMaxSize) {
 	recv(this->socketDialogueClient,data,dataMaxSize,MSG_WAITALL);
 }
 
-void TcpServer::sendData(void* data, uint32_t nbBytes) {
-	send(this->socketDialogueClient,data,nbBytes,0);
+int TcpServer::sendData(void* data, uint32_t nbBytes) {
+	if(send(this->socketDialogueClient,data,nbBytes,0) == -1) {
+		return -1;
+	}
+	return 0;
 }
 
 void TcpServer::connectAClient() {

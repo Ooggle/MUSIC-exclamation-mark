@@ -55,7 +55,7 @@ int WebHandler::parseRequest(std::string strSource) {
     regex_t reg;
 
     // Function call to create regex
-    if (regcomp(&reg, "^GET\\s\\/(music|database)(\\?.*)\\sHTTP", REG_EXTENDED) != 0) {
+    if (regcomp(&reg, "^GET\\s\\/(music|music-db)(\\?.*)\\sHTTP", REG_EXTENDED) != 0) {
         printf("Compilation error.\n");
     }
     
@@ -92,7 +92,6 @@ int WebHandler::parseRequest(std::string strSource) {
         //printf("endpoint: %s\n", sourceCopy2 + groupArray[1].rm_so);
         const char *endTemp = sourceCopy2 + groupArray[1].rm_so;
         lastRequestEndpoint = endTemp;
-        printf("%s %s %s\n", lastRequestEndpoint.c_str(), lastRequestEndpoint.c_str(), lastRequestEndpoint.c_str());
 
         /* 2ND PART */
 
@@ -173,24 +172,25 @@ void WebHandler::handlerLoop() {
         parseRequest(requestHeader.at(0).c_str());
         if(lastRequestStatus == LAST_REQUEST_STATUS::GOOD)
         {
-            printf("%s\n", lastRequestEndpoint.c_str());
             if(lastRequestEndpoint.compare("music") == 0) {
-                printf("music\n");
+                printf(" --------------- music request --------------- \n");
                 sendMusicFile();
-            } else if(lastRequestEndpoint.compare("database") == 0) {
-                printf("database\n");
-                sendForbiddenResponse();
+            } else if(lastRequestEndpoint.compare("music-db") == 0) {
+                printf(" -------------- music-db request ------------- \n");
+                sendMusicDB();
             } else {
-                printf("sendForbiddenResponse\n");
+                printf(" ------------- Forbidden request ------------- \n");
                 sendForbiddenResponse();
             }
             
         } else {
+            printf(" ---------------- bad request ---------------- \n");
             sendForbiddenResponse();
         }
         
 
         tcpServer->disconnectAClient();
+        printf("Client disconnected\n");
     }
     
 }
@@ -208,13 +208,14 @@ void WebHandler::sendForbiddenResponse() {
 }
 
 void WebHandler::sendMusicFile() {
+    printf("\n\n");
     // file loading
     std::ifstream myFile;
-    myFile.open("tests/musics/sample.mp3", std::ios_base::out | std::ios_base::app | std::ios_base::binary);
+    myFile.open("tests/musics/baka.mp3", std::ios_base::out | std::ios_base::app | std::ios_base::binary);
     if(!myFile.is_open())
         return;
 
-    std::uintmax_t totalFileSize = std::filesystem::file_size("tests/musics/sample.mp3");
+    std::uintmax_t totalFileSize = std::filesystem::file_size("tests/musics/baka.mp3");
     printf("file size : %d\n", totalFileSize);
 
     // header sending
@@ -233,8 +234,58 @@ void WebHandler::sendMusicFile() {
     tcpServer->sendData((void *)header.c_str(), header.length());
 
     // file sending
-    int sizeToRead = 5000;
-    char FileBuffer[totalFileSize];
+    int sizeToRead = 50000;
+    char lastBuffer[sizeToRead];
+    std::uintmax_t readedSize = 0;
+    while(readedSize < totalFileSize)
+    {
+        if((readedSize + sizeToRead) > totalFileSize) {
+            sizeToRead = totalFileSize - readedSize;
+        }
+        if(!myFile.read(lastBuffer, sizeToRead)) {
+            printf("Unable to read the file\n");
+            printf("\n\n");
+            return;
+        }
+        
+        if (tcpServer->sendData((void *)lastBuffer, sizeToRead) == -1) {
+            printf("Client closed connection during transfer (%.2fMb/%.2fMb).\n", (float)readedSize / 1000000, (float)totalFileSize / 1000000);
+            printf("\n\n");
+            return;
+        }
+        readedSize += sizeToRead;
+    }
+    printf("\n\n");
+}
+
+void WebHandler::sendMusicDB() {
+    printf("\n\n");
+    // file loading
+    std::ifstream myFile;
+    myFile.open("tests/db.json", std::ios_base::out | std::ios_base::app | std::ios_base::binary);
+    if(!myFile.is_open())
+        return;
+
+    std::uintmax_t totalFileSize = std::filesystem::file_size("tests/db.json");
+    printf("file size : %d\n", totalFileSize);
+
+    // header sending
+    printf("sending data...");
+    std::string header;
+    // audio/ogg pour ogg et flac, audio/mpeg pour mp3
+    header = "HTTP/1.1 200 OK\r\n";
+    header += "Connection: keep-alive\r\n";
+    header += "Content-Type: application/json\r\n";
+    header += "Content-Length: ";
+    header += std::to_string(totalFileSize);
+    header += "\r\n";
+    header += "\r\n";
+
+    printf("%s", header.c_str());
+    tcpServer->sendData((void *)header.c_str(), header.length());
+
+    // file sending
+    int sizeToRead = 50000;
     char lastBuffer[sizeToRead];
     std::uintmax_t readedSize = 0;
     while(readedSize < totalFileSize)
@@ -247,5 +298,8 @@ void WebHandler::sendMusicFile() {
         
         tcpServer->sendData((void *)lastBuffer, sizeToRead);
         readedSize += sizeToRead;
+        printf("readed size: %lu\n", readedSize);
+        printf("total size: %lu\n", totalFileSize);
     }
+    printf("\n\n");
 }

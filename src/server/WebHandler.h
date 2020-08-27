@@ -31,6 +31,7 @@ class WebHandler {
 
         void sendForbiddenResponse();
         void sendMusicFile();
+        void sendMusicDB();
 };
 
 #endif

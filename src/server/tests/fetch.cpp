@@ -62,12 +62,12 @@ json createJsonDatabase(std::string path) {
         fGenre = f.tag()->genre();
         fYear = f.tag()->year();
 
-        j[i]["file"] = filenames[i].c_str();
-        j[i]["title"] = fTitle.toCString(true);
-        j[i]["artist"] = fArtist.toCString(true);
-        j[i]["album"] = fAlbum.toCString(true);
-        j[i]["genre"] = fGenre.toCString(true);
-        j[i]["year"] = fYear;
+        j["musics"][i]["file"] = filenames[i].c_str();
+        j["musics"][i]["title"] = fTitle.toCString(true);
+        j["musics"][i]["artist"] = fArtist.toCString(true);
+        j["musics"][i]["album"] = fAlbum.toCString(true);
+        j["musics"][i]["genre"] = fGenre.toCString(true);
+        j["musics"][i]["year"] = fYear;
     }
 
 
@@ -78,8 +78,10 @@ int main() {
     json j = createJsonDatabase("musics/");
     std::string s = j.dump(4);
 
+    printf("%s\n", s.c_str());
+
     FILE *pFile = fopen ("db.json","w");
-    fprintf(pFile, "%s\n", s.c_str());
+    // fprintf(pFile, "%s\n", s.c_str());
     printf("Database created.\n");
 
     /* while(getchar() == 0); */
