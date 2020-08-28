@@ -1,0 +1,80 @@
+
+#music-big-icons-container{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+#music-big-icons-container div{
+    cursor: pointer;
+    width: 160px;
+    margin: 15px;
+}
+
+#music-big-icons-container div:hover{
+    background-color: #EEE;
+}
+
+#music-big-icons-container div img{
+    width: 100%;
+}
+
+
+/* ------------------ */
+
+#music-container{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+#music-container div{
+    cursor: pointer;
+    width: 90%;
+    margin: 15px;
+
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+
+    opacity: 1;
+}
+
+#music-container div:hover{
+    background-color: #EEE;
+}
+
+#music-container div img{
+    width: 55px;
+}
+
+/* TABLES */
+
+table{
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+  
+td, th{
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+  
+tr:nth-child(even){
+    background-color: #dddddd;
+}
+
+
+/* MUSIC PLAYER DIV */
+
+#music-player-div{
+    position: fixed;
+    bottom: 0;
+    background-color: #AAAA;
+    height: 100px;
+    width: 100vw;
+
+
+}
