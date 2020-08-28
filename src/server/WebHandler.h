@@ -18,7 +18,11 @@ class WebHandler {
 
         LAST_REQUEST_STATUS lastRequestStatus;
         std::string lastRequestEndpoint;
+        std::string lastRequestType;
         std::vector<std::pair<std::string, std::string>> lastRequestParams;
+        bool lastRequestHasContentRange;
+        std::pair<std::uintmax_t, std::uintmax_t> lastRequestContentRange;
+
 
     public:
         WebHandler(std::string address, int port);
@@ -26,12 +30,13 @@ class WebHandler {
 
         std::string getRequestLine();
         std::vector<std::string> getRequestHeader();
-        int parseRequest(std::string strSource);
+        int parseRequest(std::vector<std::string> strSource);
         void handlerLoop();
 
         void sendForbiddenResponse();
         void sendMusicFile();
         void sendMusicDB();
+        void sendHTTPOptions();
 };
 
 #endif
