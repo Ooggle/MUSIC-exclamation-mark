@@ -306,8 +306,6 @@ void WebHandler::sendMusicFile() {
         choodsedFile = "tests/musics/cosMo@暴走P feat_初音ミク/Re_Start/04 千本桜.mp3";
     } else if(choosedID == 2) {
         choodsedFile = "tests/musics/Sonic Generations 20 Years of Sonic Music [FLAC]/01. SEGA.flac";
-    } else if(choosedID == 3) {
-        choodsedFile = "tests/musics/Sonic Generations 20 Years of Sonic Music [FLAC]/04. Splash Hill - Act I ( Sonic the Hedgehog 4 Episode I).flac";
     } else {
         choodsedFile = "tests/musics/baka.mp3";
     }
