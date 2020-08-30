@@ -289,7 +289,8 @@ void WebHandler::sendMusicFile() {
     for(int i = 0; i < lastRequestParams.size(); i++)
     {
         if(lastRequestParams[i].first.compare("id") == 0) {
-            choosedID = std::stoi(lastRequestParams[i].second);
+            choosedID = (int) strtol(lastRequestParams[i].second.c_str(), (char **)NULL, 10);
+            //choosedID = std::stoi(lastRequestParams[i].second);
             printf("param: %s, value: %s\n", lastRequestParams[i].first.c_str(), lastRequestParams[i].second.c_str());
             printf("choosed: %d\n", choosedID);
             break;
@@ -338,13 +339,14 @@ void WebHandler::sendMusicFile() {
     std::string header;
     // audio/ogg pour ogg et flac, audio/mpeg pour mp3
     header = "HTTP/1.1 206 Partial Content\r\n";
+    header += "Cache-Control: no-cache, private\r\n";
     header += "Content-Type: audio/mpeg\r\n";
     header += "Accept-Ranges: bytes\r\n";
 
     if(lastRequestHasContentRange)
     {
         char tempbuffer[150];
-        sprintf(tempbuffer, "Content-Range: bytes %lu-%lu/%lu\r\n", byteToStartFrom, totalFileSize, totalFileSize);
+        sprintf(tempbuffer, "Content-Range: bytes %lu-%lu/%lu\r\n", byteToStartFrom, totalFileSize - 1, totalFileSize);
         std::string buffsprintf = tempbuffer;
         printf("%s\n", tempbuffer);
         header += buffsprintf;
