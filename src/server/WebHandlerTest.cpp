@@ -1,5 +1,4 @@
-/* compile without sqlite3 : g++ -std=c++17 WebHandlerTest.cpp WebHandler.cpp TcpServer.cpp -o WebHandlerTest -static -static-libstdc++
- * with sqlite3 : g++ -std=c++17 WebHandlerTest.cpp WebHandler.cpp TcpServer.cpp -o WebHandlerTest -lsqlite3 -lpthread -ldl -Bstatic -static-libstdc++
+/* with sqlite3 : g++ -std=c++17 WebHandlerTest.cpp WebHandler.cpp TcpServer.cpp -o WebHandlerTest -lsqlite3 -lpthread -ldl -Bstatic -static-libstdc++
 */
 
 #include <string>
@@ -7,7 +6,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sqlite3.h>
+
 #include "WebHandler.h"
+#include "DatabaseHandler.h"
 
 /* static int callback(void *NotUsed, int argc, char **argv, char **azColName) {
     int i;
@@ -20,7 +21,9 @@
 
 int main() {
 
-    WebHandler handler("localhost", 81);
+    sqlite3 *db;
+
+    WebHandler handler("localhost", 81, db);
     handler.handlerLoop();
 
     /* sqlite3 *db;

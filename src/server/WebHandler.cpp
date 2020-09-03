@@ -5,12 +5,13 @@
 #include <regex.h>
 #include "WebHandler.h"
 
-WebHandler::WebHandler(std::string address, int port) {
+WebHandler::WebHandler(std::string address, int port, sqlite3 *db) {
     tcpServer = new TcpServer();
     tcpServer->openServer(address, port);
     printf("Server opened\n");
 
     // init all attributes
+    this->db = db;
     lastRequestStatus = LAST_REQUEST_STATUS::NON_INITIALIZED;
     lastRequestEndpoint = "";
     lastRequestType = "";
@@ -286,7 +287,8 @@ void WebHandler::sendMusicFile() {
 
     // file choosing
     int choosedID = 0;
-    std::string choodsedFile;
+    std::string choosedFile;
+    std::string choosedFileExt;
 
     for(int i = 0; i < lastRequestParams.size(); i++)
     {
@@ -299,46 +301,46 @@ void WebHandler::sendMusicFile() {
         }
     }
     if(choosedID == 0) {
-        printf("Problem during transfer, aborting...\n");
+        printf("Invalid ID, aborting...\n");
         sendForbiddenResponse();
         return;
     } else {
-        /* char select[] = "SELECT * FROM COMPANY";
+        char select[] = "SELECT * FROM musics WHERE id = ?";
         sqlite3_stmt *stmt;
         if(sqlite3_prepare_v2(db, select, -1, &stmt, NULL) != SQLITE_OK) {
             printf("ERROR: while compiling sql: %s\n", sqlite3_errmsg(db));
             sqlite3_close(db);
             sqlite3_finalize(stmt);
+
+            printf("Error in SQL Prepare, aborting...\n");
+            sendForbiddenResponse();
+            return;
         }
 
         bool found = false;
 
+        if(sqlite3_bind_int(stmt, 1, choosedID) != SQLITE_OK) {
+            printf("Error in SQL Bind, aborting...\n");
+            sendForbiddenResponse();
+            return;
+        }
+
         // execute sql statement, and while there are rows returned, print ID
         int ret_code = 0;
-        while((ret_code = sqlite3_step(stmt)) == SQLITE_ROW) {
-            const unsigned char *name = sqlite3_column_text(stmt, 1);
-            printf("TEST: ID = %d\n", sqlite3_column_int(stmt, 0));
-            printf("TEST: name = %s\n", name);
-            printf("TEST: AGE = %d\n", sqlite3_column_int(stmt, 2));
+        ret_code = sqlite3_step(stmt);
+        if(ret_code == SQLITE_ROW) {
+            std::string path = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+            choosedFile = path;
+            printf("path: %s\n", path.c_str());
+
+            std::string ext = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
+            choosedFileExt = ext;
+            printf("ext: %s\n", ext.c_str());
             found = true;
-        }
-        if(ret_code != SQLITE_DONE) {
-            //this error handling could be done better, but it works
-            printf("ERROR: while performing sql: %s\n", sqlite3_errmsg(db));
-            printf("ret_code = %d\n", ret_code);
         }
 
         printf("entry %s\n", found ? "found" : "not found");
-        sqlite3_finalize(stmt); */
-    }
-    
-    
-    if(choosedID == 1) {
-        choodsedFile = "tests/musics/cosMo@暴走P feat_初音ミク/Re_Start/04 千本桜.mp3";
-    } else if(choosedID == 2) {
-        choodsedFile = "tests/musics/Sonic Generations 20 Years of Sonic Music [FLAC]/01. SEGA.flac";
-    } else {
-        choodsedFile = "tests/musics/baka.mp3";
+        sqlite3_finalize(stmt);
     }
     
 
@@ -350,7 +352,7 @@ void WebHandler::sendMusicFile() {
 
     // file loading
     std::ifstream myFile;
-    myFile.open(choodsedFile.c_str(), std::ios_base::out | std::ios_base::app | std::ios_base::binary);
+    myFile.open(choosedFile.c_str(), std::ios_base::out | std::ios_base::app | std::ios_base::binary);
     if(!myFile.is_open())
         return;
     
@@ -361,13 +363,13 @@ void WebHandler::sendMusicFile() {
     }
     
 
-    std::uintmax_t totalFileSize = std::filesystem::file_size(choodsedFile.c_str());
+    std::uintmax_t totalFileSize = std::filesystem::file_size(choosedFile.c_str());
     printf("file size : %d\n", totalFileSize);
 
     // header sending
     printf("sending data...");
     std::string header;
-    // audio/ogg pour ogg et flac, audio/mpeg pour mp3
+    // audio/ogg ou audio/flac pour ogg et flac, audio/mpeg pour mp3
     if(lastRequestHasContentRange) {
         header = "HTTP/1.1 206 Partial Content\r\n";
     } else {
@@ -375,7 +377,13 @@ void WebHandler::sendMusicFile() {
     }
     
     header += "Cache-Control: no-cache, private\r\n";
-    header += "Content-Type: audio/mpeg\r\n";
+    if(choosedFileExt.compare(".flac") == 0)
+    {
+        header += "Content-Type: audio/flac\r\n";
+    } else if(choosedFileExt.compare(".mp3") == 0) {
+        header += "Content-Type: audio/mpeg\r\n";
+    }
+    
     header += "Accept-Ranges: bytes\r\n";
 
     if(lastRequestHasContentRange)
@@ -417,7 +425,6 @@ void WebHandler::sendMusicFile() {
             printf("\n\n");
             return;
         }
-        printf("%lu\n", readedSize);
         readedSize += sizeToRead;
     }
     printf("\n\n");

@@ -29,9 +29,10 @@ class WebHandler {
         bool lastRequestHasContentRange;
         std::pair<std::uintmax_t, std::uintmax_t> lastRequestContentRange;
 
+        sqlite3 *db;
 
     public:
-        WebHandler(std::string address, int port);
+        WebHandler(std::string address, int port, sqlite3 *db);
         ~WebHandler();
 
         std::string getRequestLine();
