@@ -11,7 +11,7 @@ WebHandler::WebHandler(std::string address, int port) {
     printf("Server opened\n");
 
     // init all attributes
-    lastRequestStatus = LAST_REQUEST_STATUS::NON_INITIALIZED;  
+    lastRequestStatus = LAST_REQUEST_STATUS::NON_INITIALIZED;
     lastRequestEndpoint = "";
     lastRequestType = "";
     lastRequestParams.clear();
@@ -260,7 +260,7 @@ void WebHandler::handlerLoop() {
             sendForbiddenResponse();
         }
         
-
+        printf("Disconnecting client\n");
         tcpServer->disconnectAClient();
         printf("Client disconnected\n");
     }
@@ -286,6 +286,8 @@ void WebHandler::sendMusicFile() {
 
     // file choosing
     int choosedID = 0;
+    std::string choodsedFile;
+
     for(int i = 0; i < lastRequestParams.size(); i++)
     {
         if(lastRequestParams[i].first.compare("id") == 0) {
@@ -300,9 +302,37 @@ void WebHandler::sendMusicFile() {
         printf("Problem during transfer, aborting...\n");
         sendForbiddenResponse();
         return;
+    } else {
+        /* char select[] = "SELECT * FROM COMPANY";
+        sqlite3_stmt *stmt;
+        if(sqlite3_prepare_v2(db, select, -1, &stmt, NULL) != SQLITE_OK) {
+            printf("ERROR: while compiling sql: %s\n", sqlite3_errmsg(db));
+            sqlite3_close(db);
+            sqlite3_finalize(stmt);
+        }
+
+        bool found = false;
+
+        // execute sql statement, and while there are rows returned, print ID
+        int ret_code = 0;
+        while((ret_code = sqlite3_step(stmt)) == SQLITE_ROW) {
+            const unsigned char *name = sqlite3_column_text(stmt, 1);
+            printf("TEST: ID = %d\n", sqlite3_column_int(stmt, 0));
+            printf("TEST: name = %s\n", name);
+            printf("TEST: AGE = %d\n", sqlite3_column_int(stmt, 2));
+            found = true;
+        }
+        if(ret_code != SQLITE_DONE) {
+            //this error handling could be done better, but it works
+            printf("ERROR: while performing sql: %s\n", sqlite3_errmsg(db));
+            printf("ret_code = %d\n", ret_code);
+        }
+
+        printf("entry %s\n", found ? "found" : "not found");
+        sqlite3_finalize(stmt); */
     }
     
-    std::string choodsedFile;
+    
     if(choosedID == 1) {
         choodsedFile = "tests/musics/cosMo@暴走P feat_初音ミク/Re_Start/04 千本桜.mp3";
     } else if(choosedID == 2) {
@@ -338,7 +368,12 @@ void WebHandler::sendMusicFile() {
     printf("sending data...");
     std::string header;
     // audio/ogg pour ogg et flac, audio/mpeg pour mp3
-    header = "HTTP/1.1 206 Partial Content\r\n";
+    if(lastRequestHasContentRange) {
+        header = "HTTP/1.1 206 Partial Content\r\n";
+    } else {
+        header = "HTTP/1.1 200 OK\r\n";
+    }
+    
     header += "Cache-Control: no-cache, private\r\n";
     header += "Content-Type: audio/mpeg\r\n";
     header += "Accept-Ranges: bytes\r\n";
@@ -382,6 +417,7 @@ void WebHandler::sendMusicFile() {
             printf("\n\n");
             return;
         }
+        printf("%lu\n", readedSize);
         readedSize += sizeToRead;
     }
     printf("\n\n");
@@ -399,7 +435,7 @@ void WebHandler::sendMusicDB() {
     printf("file size : %d\n", totalFileSize);
 
     // header sending
-    printf("sending data...");
+    printf("sending data...\n");
     std::string header;
     // audio/ogg pour ogg et flac, audio/mpeg pour mp3
     header = "HTTP/1.1 200 OK\r\n";
@@ -413,6 +449,7 @@ void WebHandler::sendMusicDB() {
 
     // printf("%s", header.c_str());
     tcpServer->sendData((void *)header.c_str(), header.length());
+    printf("header sent.\n");
 
     // file sending
     int sizeToRead = 50000;

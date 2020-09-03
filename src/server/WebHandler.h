@@ -1,9 +1,15 @@
-#include <string>
-#include <vector>
-#include "TcpServer.h"
-
 #ifndef WEBHANDLER_H
 #define WEBHANDLER_H
+
+// c++ includes
+#include <string>
+#include <vector>
+
+// c includes
+#include <sqlite3.h>
+
+// TCP handler class
+#include "TcpServer.h"
 
 enum LAST_REQUEST_STATUS {
     NON_INITIALIZED, // at the beginning
