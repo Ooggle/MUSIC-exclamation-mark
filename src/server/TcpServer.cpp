@@ -41,6 +41,13 @@ void TcpServer::openServer(std::string address, uint16_t port, int32_t nbPlaces)
     setsockopt(this->socketWaitClient, SOL_SOCKET, SO_REUSEADDR, (const char*)&_enable,sizeof(unsigned long));
 	bind(this->socketWaitClient, (struct sockaddr *)&serverAdress, sizeof(struct sockaddr_in));
 
+	// timeout (1s)
+	/* struct timeval tv;
+	tv.tv_sec = 1;
+	tv.tv_usec = 0;
+	setsockopt(this->socketWaitClient, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv); */
+
+
 	// Waiting for one client
 	listen(this->socketWaitClient, nbPlaces);
 }
@@ -52,12 +59,16 @@ void TcpServer::closeServer() {
 	this->socketWaitClient=-1;
 }
 
-void TcpServer::getData(void* data, uint32_t dataMaxSize) {
-	recv(this->socketDialogueClient, data, dataMaxSize, MSG_NOSIGNAL);
+ssize_t TcpServer::getData(void* data, uint32_t dataMaxSize) {
+	return recv(this->socketDialogueClient, data, dataMaxSize, MSG_DONTWAIT);
+}
+
+ssize_t TcpServer::getDataBlocking(void* data, uint32_t dataMaxSize) {
+	return recv(this->socketDialogueClient, data, dataMaxSize, MSG_WAITALL);
 }
 
 int TcpServer::sendData(void* data, uint32_t nbBytes) {
-	if(send(this->socketDialogueClient, data, nbBytes, MSG_NOSIGNAL) == -1) {
+	if(send(this->socketDialogueClient, data, nbBytes, MSG_WAITALL) == -1) {
 		return -1;
 	}
 	return 0;
@@ -68,7 +79,9 @@ void TcpServer::connectAClient() {
 	struct sockaddr_in adresseClient;
 	tailleAdresseClient = sizeof(struct sockaddr_in);
 	bzero((char *) &adresseClient, sizeof(struct sockaddr_in));
-	this->socketDialogueClient = accept(this->socketWaitClient , (struct sockaddr *) &adresseClient , &tailleAdresseClient);	
+	do {
+		this->socketDialogueClient = accept(this->socketWaitClient , (struct sockaddr *) &adresseClient , &tailleAdresseClient);
+	} while(this->socketDialogueClient == -1);
 }
 
 void TcpServer::disconnectAClient() {

@@ -1,4 +1,4 @@
-/* compile without sqlite3 : g++ -std=c++17 DatabaseHandlerTest.cpp WebHandler.cpp TcpServer.cpp -o DatabaseHandlerTest -lsqlite3 -lpthread -ldl `taglib-config --libs` `pkg-config --cflags --libs taglib` -lz -Bstatic -static-libstdc++ */
+/* compile : g++ -std=c++17 DatabaseHandlerTest.cpp DatabaseHandler.cpp WebHandler.cpp TcpServer.cpp -o DatabaseHandlerTest -lsqlite3 -lpthread -ldl `taglib-config --libs` `pkg-config --cflags --libs taglib` -lz -Bstatic -static-libstdc++ */
 
 // c++ includes
 #include <string>
@@ -28,7 +28,7 @@ int main() {
     /* WebHandler handler("localhost", 81);
     handler.handlerLoop(); */
 
-    DatabaseHandler *dbHandler = new DatabaseHandler("test.db");
+    DatabaseHandler *dbHandler = new DatabaseHandler("music.db");
 
     if(dbHandler->getIsDatabaseInitialised() == false) {
         return 1;

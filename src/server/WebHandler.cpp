@@ -19,6 +19,7 @@ WebHandler::WebHandler(std::string address, int port, sqlite3 *db) {
     lastRequestHasContentRange = false;
     lastRequestContentRange.first = -1;
     lastRequestContentRange.second = -1;
+    lastRequestHasTimedOut = false;
 }
 
 WebHandler::~WebHandler() {
@@ -29,13 +30,19 @@ WebHandler::~WebHandler() {
 std::string WebHandler::getRequestLine() {
     uint8_t data = 0;
     std::string line = "";
+    int timeout = 0, rc = 0;
 
-    while(data != 0x0A)
+    while(data != 0x0A && lastRequestHasTimedOut == false)
     {
-        tcpServer->getData(&data, 1);
+        rc = tcpServer->getData(&data, 1);
 
-        if(data != 0x0A)
+        if(data != 0x0A && rc != -1)
             line += data;
+
+        timeout += 1;
+        if(timeout > 10000) {
+            lastRequestHasTimedOut = true;
+        }
     }
 
     return line;
@@ -43,10 +50,15 @@ std::string WebHandler::getRequestLine() {
 
 std::vector<std::string> WebHandler::getRequestHeader() {
     std::vector<std::string> request;
+    lastRequestHasTimedOut = false;
 
     do
     {
         request.push_back(getRequestLine());
+
+        if(lastRequestHasTimedOut)
+            break;
+        
         /* printf("length: %d\n", request.back().length()); */
         // printf("%s\n", request.back().c_str());
     } while(request.back().length() > 2);
@@ -229,39 +241,45 @@ void WebHandler::handlerLoop() {
         printf("Client connected\n");
 
         std::vector<std::string> requestHeader = getRequestHeader();
-        parseRequest(requestHeader);
-        
-        printf("%s\n", lastRequestType.c_str());
-        if(lastRequestStatus == LAST_REQUEST_STATUS::GOOD)
-        {
-            if(lastRequestType.compare("GET") == 0)
+        if(lastRequestHasTimedOut == false) {
+            parseRequest(requestHeader);
+            
+            printf("%s\n", lastRequestType.c_str());
+            if(lastRequestStatus == LAST_REQUEST_STATUS::GOOD)
             {
-                if(lastRequestEndpoint.compare("music") == 0) {
-                    printf(" --------------- music request --------------- \n");
-                    sendMusicFile();
-                } else if(lastRequestEndpoint.compare("music-db") == 0) {
-                    printf(" -------------- music-db request ------------- \n");
-                    sendMusicDB();
+                if(lastRequestType.compare("GET") == 0)
+                {
+                    if(lastRequestEndpoint.compare("music") == 0) {
+                        printf(" --------------- music request ---------------\n");
+                        sendMusicFile();
+                    } else if(lastRequestEndpoint.compare("music-db") == 0) {
+                        printf(" -------------- music-db request -------------\n");
+                        sendMusicDB();
+                    } else {
+                        printf(" ------------- Forbidden request -------------\n");
+                        sendForbiddenResponse();
+                    }
+                } else if(lastRequestType.compare("OPTIONS") == 0) {
+                    printf(" ---------------- OPTIONS request ----------------\n");
+                    sendHTTPOptions();
                 } else {
-                    printf(" ------------- Forbidden request ------------- \n");
+                    printf(" -------------- Bad request type -------------\n");
                     sendForbiddenResponse();
                 }
-            } else if(lastRequestType.compare("OPTIONS") == 0) {
-                printf(" ---------------- OPTIONS request ---------------- \n");
-                sendHTTPOptions();
+                
+                
+                
             } else {
-                printf(" -------------- Bad request type ------------- \n");
+                printf(" ---------------- bad request ----------------\n");
                 sendForbiddenResponse();
             }
-            
-            
-            
         } else {
-            printf(" ---------------- bad request ---------------- \n");
-            sendForbiddenResponse();
+            printf(" ---------------- Timed out ----------------\n");
         }
         
-        printf("Disconnecting client\n");
+        
+        
+        printf("Disconnecting client...\n");
         tcpServer->disconnectAClient();
         printf("Client disconnected\n");
     }
@@ -295,8 +313,8 @@ void WebHandler::sendMusicFile() {
         if(lastRequestParams[i].first.compare("id") == 0) {
             choosedID = (int) strtol(lastRequestParams[i].second.c_str(), (char **)NULL, 10);
             //choosedID = std::stoi(lastRequestParams[i].second);
-            printf("param: %s, value: %s\n", lastRequestParams[i].first.c_str(), lastRequestParams[i].second.c_str());
-            printf("choosed: %d\n", choosedID);
+            /* printf("param: %s, value: %s\n", lastRequestParams[i].first.c_str(), lastRequestParams[i].second.c_str()); */
+            printf("music id: %d\n", choosedID);
             break;
         }
     }
@@ -331,15 +349,20 @@ void WebHandler::sendMusicFile() {
         if(ret_code == SQLITE_ROW) {
             std::string path = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
             choosedFile = path;
-            printf("path: %s\n", path.c_str());
+            printf("music: %s\n", path.c_str());
 
             std::string ext = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
             choosedFileExt = ext;
-            printf("ext: %s\n", ext.c_str());
+            /* printf("ext: %s\n", ext.c_str()); */
             found = true;
         }
 
-        printf("entry %s\n", found ? "found" : "not found");
+        if(!found) {
+            printf("Incorrect ID, aborting...\n");
+            sendForbiddenResponse();
+            return;
+        }
+
         sqlite3_finalize(stmt);
     }
     
@@ -367,7 +390,7 @@ void WebHandler::sendMusicFile() {
     printf("file size : %d\n", totalFileSize);
 
     // header sending
-    printf("sending data...");
+    /* printf("sending data..."); */
     std::string header;
     // audio/ogg ou audio/flac pour ogg et flac, audio/mpeg pour mp3
     if(lastRequestHasContentRange) {
@@ -382,6 +405,8 @@ void WebHandler::sendMusicFile() {
         header += "Content-Type: audio/flac\r\n";
     } else if(choosedFileExt.compare(".mp3") == 0) {
         header += "Content-Type: audio/mpeg\r\n";
+    } else if(choosedFileExt.compare(".ogg") == 0) {
+        header += "Content-Type: audio/ogg\r\n";
     }
     
     header += "Accept-Ranges: bytes\r\n";
@@ -391,7 +416,7 @@ void WebHandler::sendMusicFile() {
         char tempbuffer[150];
         sprintf(tempbuffer, "Content-Range: bytes %lu-%lu/%lu\r\n", byteToStartFrom, totalFileSize - 1, totalFileSize);
         std::string buffsprintf = tempbuffer;
-        printf("%s\n", tempbuffer);
+        /* printf("%s\n", tempbuffer); */
         header += buffsprintf;
     }
 
@@ -427,11 +452,12 @@ void WebHandler::sendMusicFile() {
         }
         readedSize += sizeToRead;
     }
+    myFile.close();
     printf("\n\n");
 }
 
 void WebHandler::sendMusicDB() {
-    printf("\n\n");
+    /* printf("\n\n"); */
     // file loading
     std::ifstream myFile;
     myFile.open("tests/db.json", std::ios_base::out | std::ios_base::app | std::ios_base::binary);
@@ -439,14 +465,13 @@ void WebHandler::sendMusicDB() {
         return;
 
     std::uintmax_t totalFileSize = std::filesystem::file_size("tests/db.json");
-    printf("file size : %d\n", totalFileSize);
+    /* printf("file size : %d\n", totalFileSize); */
 
     // header sending
-    printf("sending data...\n");
+    /* printf("sending data...\n"); */
     std::string header;
     // audio/ogg pour ogg et flac, audio/mpeg pour mp3
     header = "HTTP/1.1 200 OK\r\n";
-    header += "Connection: keep-alive\r\n";
     header += "Access-Control-Allow-Origin: *\r\n";
     header += "Content-Type: application/json\r\n";
     header += "Content-Length: ";
@@ -456,7 +481,7 @@ void WebHandler::sendMusicDB() {
 
     // printf("%s", header.c_str());
     tcpServer->sendData((void *)header.c_str(), header.length());
-    printf("header sent.\n");
+    /* printf("header sent.\n"); */
 
     // file sending
     int sizeToRead = 50000;
@@ -472,18 +497,18 @@ void WebHandler::sendMusicDB() {
         
         tcpServer->sendData((void *)lastBuffer, sizeToRead);
         readedSize += sizeToRead;
-        printf("readed size: %lu\n", readedSize);
-        printf("total size: %lu\n", totalFileSize);
+        /* printf("readed size: %lu\n", readedSize);
+        printf("total size: %lu\n", totalFileSize); */
     }
-    printf("\n\n");
+    /* printf("\n\n"); */
 }
 
 void WebHandler::sendHTTPOptions() {
-    printf("\n\n");
+    /* printf("\n\n"); */
     // header sending
-    printf("sending data...");
+    /* printf("sending data..."); */
     std::string header;
-    // audio/ogg pour ogg et flac, audio/mpeg pour mp3
+
     header = "HTTP/1.1 204 No Content\r\n";
     header += "Allow: OPTIONS, GET\r\n";
     header += "Access-Control-Allow-Origin: *\r\n";
@@ -492,5 +517,5 @@ void WebHandler::sendHTTPOptions() {
     printf("%s", header.c_str());
     tcpServer->sendData((void *)header.c_str(), header.length());
 
-    printf("\n\n");
+    /* printf("\n\n"); */
 }

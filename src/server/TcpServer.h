@@ -29,8 +29,11 @@ class TcpServer {
 
 
   public:
-    // Get data from connected client. Get a max of "dataMaxSize" bytes. The getted bytes are stored in "data".
-    void getData(void* data, uint32_t dataMaxSize);
+    // Get data from connected client. Get a max of "dataMaxSize" bytes. The getted bytes are stored in "data". Size read is returned.
+    ssize_t getData(void* data, uint32_t dataMaxSize);
+
+    // Get data from connected client. Get a max of "dataMaxSize" bytes. The getted bytes are stored in "data". Size read is returned. Block until data are read.
+    ssize_t getDataBlocking(void* data, uint32_t dataMaxSize);
 
     // Send "nbBytes" first bytes of the "data" array to the connected client.
     // return 0 if good, -1 if client disconnected.

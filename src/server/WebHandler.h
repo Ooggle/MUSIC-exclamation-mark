@@ -28,6 +28,7 @@ class WebHandler {
         std::vector<std::pair<std::string, std::string>> lastRequestParams;
         bool lastRequestHasContentRange;
         std::pair<std::uintmax_t, std::uintmax_t> lastRequestContentRange;
+        bool lastRequestHasTimedOut;
 
         sqlite3 *db;
 

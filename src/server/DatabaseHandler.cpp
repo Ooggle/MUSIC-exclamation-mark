@@ -3,7 +3,7 @@
 DatabaseHandler::DatabaseHandler(std::string DatabasePath) {
     char *zErrMsg = NULL;
 
-    if(sqlite3_open("test.db", &db)) {
+    if(sqlite3_open(DatabasePath.c_str(), &db)) {
         fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
         isDatabaseInitialised = false;
     } else {
