@@ -1,8 +1,10 @@
 #include <string>
 #include <fstream>
 #include <filesystem>
+#include <thread>
 #include <string.h>
 #include <regex.h>
+#include "json.hpp"
 #include "WebHandler.h"
 
 WebHandler::WebHandler(std::string address, int port, sqlite3 *db) {
@@ -40,7 +42,7 @@ std::string WebHandler::getRequestLine() {
             line += data;
 
         timeout += 1;
-        if(timeout > 10000) {
+        if(timeout > 100000) {
             lastRequestHasTimedOut = true;
         }
     }
@@ -245,43 +247,62 @@ void WebHandler::handlerLoop() {
             parseRequest(requestHeader);
             
             printf("%s\n", lastRequestType.c_str());
-            if(lastRequestStatus == LAST_REQUEST_STATUS::GOOD)
-            {
+            if(lastRequestStatus == LAST_REQUEST_STATUS::GOOD) {
                 if(lastRequestType.compare("GET") == 0)
                 {
                     if(lastRequestEndpoint.compare("music") == 0) {
                         printf(" --------------- music request ---------------\n");
-                        sendMusicFile();
+                        std::thread musicSend(&WebHandler::sendMusicFile, this);
+                        musicSend.join();
+                        printf("Disconnecting client...\n");
+                        tcpServer->disconnectAClient();
+                        printf("Client disconnected\n");
                     } else if(lastRequestEndpoint.compare("music-db") == 0) {
                         printf(" -------------- music-db request -------------\n");
                         sendMusicDB();
+                        printf("Disconnecting client...\n");
+                        tcpServer->disconnectAClient();
+                        printf("Client disconnected\n");
                     } else {
                         printf(" ------------- Forbidden request -------------\n");
                         sendForbiddenResponse();
+                        printf("Disconnecting client...\n");
+                        tcpServer->disconnectAClient();
+                        printf("Client disconnected\n");
                     }
                 } else if(lastRequestType.compare("OPTIONS") == 0) {
-                    printf(" ---------------- OPTIONS request ----------------\n");
+                    printf(" -------------- OPTIONS request --------------\n");
                     sendHTTPOptions();
+                    printf("Disconnecting client...\n");
+                    tcpServer->disconnectAClient();
+                    printf("Client disconnected\n");
                 } else {
                     printf(" -------------- Bad request type -------------\n");
                     sendForbiddenResponse();
+                    printf("Disconnecting client...\n");
+                    tcpServer->disconnectAClient();
+                    printf("Client disconnected\n");
                 }
-                
-                
                 
             } else {
                 printf(" ---------------- bad request ----------------\n");
                 sendForbiddenResponse();
+                printf("Disconnecting client...\n");
+                tcpServer->disconnectAClient();
+                printf("Client disconnected\n");
             }
         } else {
             printf(" ---------------- Timed out ----------------\n");
+            printf("Disconnecting client...\n");
+            tcpServer->disconnectAClient();
+            printf("Client disconnected\n");
         }
         
         
         
-        printf("Disconnecting client...\n");
+        /* printf("Disconnecting client...\n");
         tcpServer->disconnectAClient();
-        printf("Client disconnected\n");
+        printf("Client disconnected\n"); */
     }
     
 }
@@ -343,7 +364,7 @@ void WebHandler::sendMusicFile() {
             return;
         }
 
-        // execute sql statement, and while there are rows returned, print ID
+        // execute sql statement
         int ret_code = 0;
         ret_code = sqlite3_step(stmt);
         if(ret_code == SQLITE_ROW) {
@@ -464,7 +485,50 @@ void WebHandler::sendMusicDB() {
     if(!myFile.is_open())
         return;
 
-    std::uintmax_t totalFileSize = std::filesystem::file_size("tests/db.json");
+
+
+
+
+    char select[] = "SELECT * FROM musics";
+    sqlite3_stmt *stmt;
+    if(sqlite3_prepare_v2(db, select, -1, &stmt, NULL) != SQLITE_OK) {
+        printf("ERROR: while compiling sql: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        sqlite3_finalize(stmt);
+
+        printf("Error in SQL Prepare, aborting...\n");
+        sendForbiddenResponse();
+        return;
+    }
+
+    nlohmann::json json;
+
+
+    // execute sql statement to create json
+    int ret_code = 0;
+    int rownum = 0;
+    while((ret_code = sqlite3_step(stmt)) == SQLITE_ROW) {
+
+        json["musics"][rownum]["id"] = sqlite3_column_int(stmt, 0);
+        json["musics"][rownum]["filename"] = "not yet";
+        json["musics"][rownum]["album_id"] = sqlite3_column_int(stmt, 3);
+        json["musics"][rownum]["genre"] = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
+        json["musics"][rownum]["track_number"] = sqlite3_column_int(stmt, 5);
+        json["musics"][rownum]["comment"] = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6));
+        json["musics"][rownum]["title"] = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 7));
+        json["musics"][rownum]["artist"] = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 8));
+        json["musics"][rownum]["year"] = sqlite3_column_int(stmt, 9);
+
+        rownum += 1;
+    }
+
+    sqlite3_finalize(stmt);
+
+    std::string jsonDump = json.dump(4);
+
+
+
+    std::uintmax_t totalFileSize = jsonDump.size();
     /* printf("file size : %d\n", totalFileSize); */
 
     // header sending
@@ -492,10 +556,8 @@ void WebHandler::sendMusicDB() {
         if((readedSize + sizeToRead) > totalFileSize) {
             sizeToRead = totalFileSize - readedSize;
         }
-        if(!myFile.read(lastBuffer, sizeToRead))
-            return;
         
-        tcpServer->sendData((void *)lastBuffer, sizeToRead);
+        tcpServer->sendData((void *)(jsonDump.c_str() + readedSize), sizeToRead);
         readedSize += sizeToRead;
         /* printf("readed size: %lu\n", readedSize);
         printf("total size: %lu\n", totalFileSize); */

@@ -4,6 +4,7 @@
 // c++ includes
 #include <string>
 #include <vector>
+#include <thread>
 
 // c includes
 #include <sqlite3.h>
