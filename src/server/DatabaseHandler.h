@@ -25,7 +25,7 @@ class DatabaseHandler {
         DatabaseHandler(std::string DatabasePath);
         ~DatabaseHandler();
 
-        std::vector<std::pair<std::string, std::string>> getFilesInDirectory(std::string path);
+        std::vector<std::vector<std::string>> getFilesInDirectory(std::string path);
         // Create the server databases.
         int createDatabases();
         // Init the server databases.

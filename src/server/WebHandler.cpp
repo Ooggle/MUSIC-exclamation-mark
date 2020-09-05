@@ -252,8 +252,7 @@ void WebHandler::handlerLoop() {
                 {
                     if(lastRequestEndpoint.compare("music") == 0) {
                         printf(" --------------- music request ---------------\n");
-                        std::thread musicSend(&WebHandler::sendMusicFile, this);
-                        musicSend.join();
+                        sendMusicFile();
                         printf("Disconnecting client...\n");
                         tcpServer->disconnectAClient();
                         printf("Client disconnected\n");
@@ -486,9 +485,6 @@ void WebHandler::sendMusicDB() {
         return;
 
 
-
-
-
     char select[] = "SELECT * FROM musics";
     sqlite3_stmt *stmt;
     if(sqlite3_prepare_v2(db, select, -1, &stmt, NULL) != SQLITE_OK) {
@@ -510,14 +506,14 @@ void WebHandler::sendMusicDB() {
     while((ret_code = sqlite3_step(stmt)) == SQLITE_ROW) {
 
         json["musics"][rownum]["id"] = sqlite3_column_int(stmt, 0);
-        json["musics"][rownum]["filename"] = "not yet";
-        json["musics"][rownum]["album_id"] = sqlite3_column_int(stmt, 3);
-        json["musics"][rownum]["genre"] = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
-        json["musics"][rownum]["track_number"] = sqlite3_column_int(stmt, 5);
-        json["musics"][rownum]["comment"] = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6));
-        json["musics"][rownum]["title"] = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 7));
-        json["musics"][rownum]["artist"] = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 8));
-        json["musics"][rownum]["year"] = sqlite3_column_int(stmt, 9);
+        json["musics"][rownum]["filename"] = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+        json["musics"][rownum]["album_id"] = sqlite3_column_int(stmt, 4);
+        json["musics"][rownum]["genre"] = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 5));
+        json["musics"][rownum]["track_number"] = sqlite3_column_int(stmt, 6);
+        json["musics"][rownum]["comment"] = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 7));
+        json["musics"][rownum]["title"] = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 8));
+        json["musics"][rownum]["artist"] = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 9));
+        json["musics"][rownum]["year"] = sqlite3_column_int(stmt, 10);
 
         rownum += 1;
     }

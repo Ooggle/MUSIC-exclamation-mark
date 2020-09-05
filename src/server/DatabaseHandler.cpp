@@ -16,21 +16,31 @@ DatabaseHandler::~DatabaseHandler() {
     sqlite3_close(db);
 }
 
-std::vector<std::pair<std::string, std::string>> DatabaseHandler::getFilesInDirectory(std::string path) {
-    std::vector<std::pair<std::string, std::string>> filenames;
+std::vector<std::vector<std::string>> DatabaseHandler::getFilesInDirectory(std::string path) {
+    std::vector<std::vector<std::string>> filenames;
+    int i = 0;
 
     for(const auto & entry : std::filesystem::directory_iterator(path)) {
         //std::cout << entry.path() << ", directory: " << entry.is_directory() << std::endl;
         if(entry.is_directory()) {
-            std::vector<std::pair<std::string, std::string>> filenamesTemp = getFilesInDirectory(entry.path());
+            std::vector<std::vector<std::string>> filenamesTemp = getFilesInDirectory(entry.path());
             filenames.insert(filenames.end(), filenamesTemp.begin(), filenamesTemp.end());
         } else {
             if((entry.path().extension() == ".mp3") ||
             (entry.path().extension() == ".ogg") ||
             (entry.path().extension() == ".flac")) {
-                filenames.push_back(std::pair(entry.path(), entry.path().extension()));
+
+                std::vector<std::string> vectTemp;
+                vectTemp.push_back(entry.path());
+                std::string filenameTemp = entry.path().filename();
+                size_t lastindexTemp = filenameTemp.find_last_of(".");
+                vectTemp.push_back(filenameTemp.substr(0, lastindexTemp));
+                vectTemp.push_back(entry.path().extension());
+
+                filenames.push_back(vectTemp);
             }
         }
+        i += 1;
     }
     return filenames;
 }
@@ -45,6 +55,7 @@ int DatabaseHandler::createDatabases() {
     /* CREATE TABLE musics */
     sql = "CREATE TABLE musics (\
             id              INTEGER PRIMARY KEY,\
+            filename        VARCHAR(5000),\
             path            VARCHAR(5000),\
             extension       VARCHAR(10),\
             album_id        INTEGER,\
@@ -127,7 +138,7 @@ int DatabaseHandler::createDatabases() {
 }
 
 int DatabaseHandler::initDatabases(std::string path) {
-    std::vector<std::pair<std::string, std::string>> filenames = getFilesInDirectory(path);
+    std::vector<std::vector<std::string>> filenames = getFilesInDirectory(path);
 
     // print vector of strings
     /* printf("\n      -- ALL FILES --\n");
@@ -146,7 +157,7 @@ int DatabaseHandler::initDatabases(std::string path) {
     int rc;
 
     sqlite3_stmt *stmt = NULL;
-    rc = sqlite3_prepare_v2(db, "INSERT INTO musics (path, extension, album_id, genre, track_number, comment, title, artist, year) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", -1, &stmt, NULL);
+    rc = sqlite3_prepare_v2(db, "INSERT INTO musics (path, filename, extension, album_id, genre, track_number, comment, title, artist, year) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", -1, &stmt, NULL);
 
     if(rc != SQLITE_OK) {
         printf("prepare failed: %s\n", sqlite3_errmsg(db));
@@ -156,7 +167,7 @@ int DatabaseHandler::initDatabases(std::string path) {
             
 
             //get music infos
-            TagLib::FileRef f(filenames[i].first.c_str());
+            TagLib::FileRef f(filenames[i].at(0).c_str());
             fTitle = f.tag()->title();
             fArtist = f.tag()->artist();
             fAlbum = f.tag()->album();
@@ -183,15 +194,16 @@ int DatabaseHandler::initDatabases(std::string path) {
             strcpy(artist, fArtist.toCString(true));
             int artistLength = sprintf(artist, "%s", artist);
 
-            sqlite3_bind_text(stmt, 1, filenames[i].first.c_str(), filenames[i].first.length(), NULL);
-            sqlite3_bind_text(stmt, 2, filenames[i].second.c_str(), filenames[i].second.length(), NULL);
-            sqlite3_bind_int(stmt, 3, 1); //TODO
-            sqlite3_bind_text(stmt, 4, genre, genreLength, NULL);
-            sqlite3_bind_int(stmt, 5, fTrack);
-            sqlite3_bind_text(stmt, 6, comment, commentLength, NULL);
-            sqlite3_bind_text(stmt, 7, title, titleLength, NULL);
-            sqlite3_bind_text(stmt, 8, artist, artistLength, NULL);
-            sqlite3_bind_int(stmt, 9, fYear);
+            sqlite3_bind_text(stmt, 1, filenames[i].at(0).c_str(), filenames[i].at(0).length(), NULL);
+            sqlite3_bind_text(stmt, 2, filenames[i].at(1).c_str(), filenames[i].at(1).length(), NULL);
+            sqlite3_bind_text(stmt, 3, filenames[i].at(2).c_str(), filenames[i].at(2).length(), NULL);
+            sqlite3_bind_int(stmt, 4, 1); //TODO
+            sqlite3_bind_text(stmt, 5, genre, genreLength, NULL);
+            sqlite3_bind_int(stmt, 6, fTrack);
+            sqlite3_bind_text(stmt, 7, comment, commentLength, NULL);
+            sqlite3_bind_text(stmt, 8, title, titleLength, NULL);
+            sqlite3_bind_text(stmt, 9, artist, artistLength, NULL);
+            sqlite3_bind_int(stmt, 10, fYear);
             
 
             rc = sqlite3_step(stmt);
