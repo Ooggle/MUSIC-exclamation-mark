@@ -118,8 +118,8 @@ int DatabaseHandler::createDatabases() {
     /* CREATE TABLE albums */
     sql = "CREATE TABLE albums (\
             id              INTEGER PRIMARY KEY,\
-            user_id         INTEGER,\
-            music_id        INTEGER,\
+            name         VARCHAR(500),\
+            artist        VARCHAR(500),\
             cover_image     BLOB\
         )";
 
@@ -157,7 +157,7 @@ int DatabaseHandler::initDatabases(std::string path) {
     int rc;
 
     sqlite3_stmt *stmt = NULL;
-    rc = sqlite3_prepare_v2(db, "INSERT INTO musics (path, filename, extension, album_id, genre, track_number, comment, title, artist, year) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", -1, &stmt, NULL);
+    rc = sqlite3_prepare_v2(db, "INSERT INTO musics(path, filename, extension, album_id, genre, track_number, comment, title, artist, year) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", -1, &stmt, NULL);
 
     if(rc != SQLITE_OK) {
         printf("prepare failed: %s\n", sqlite3_errmsg(db));

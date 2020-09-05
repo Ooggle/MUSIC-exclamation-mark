@@ -44,7 +44,8 @@ class WebHandler {
 
         void sendForbiddenResponse();
         void sendMusicFile();
-        void sendMusicDB();
+        void sendMusicsDB();
+        void sendAlbumsDB();
         void sendHTTPOptions();
 };
 

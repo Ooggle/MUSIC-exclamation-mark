@@ -68,7 +68,7 @@ ssize_t TcpServer::getDataBlocking(void* data, uint32_t dataMaxSize) {
 }
 
 int TcpServer::sendData(void* data, uint32_t nbBytes) {
-	if(send(this->socketDialogueClient, data, nbBytes, MSG_WAITALL) == -1) {
+	if(send(this->socketDialogueClient, data, nbBytes, MSG_NOSIGNAL) == -1) {
 		return -1;
 	}
 	return 0;

@@ -258,7 +258,7 @@ void WebHandler::handlerLoop() {
                         printf("Client disconnected\n");
                     } else if(lastRequestEndpoint.compare("music-db") == 0) {
                         printf(" -------------- music-db request -------------\n");
-                        sendMusicDB();
+                        sendMusicsDB();
                         printf("Disconnecting client...\n");
                         tcpServer->disconnectAClient();
                         printf("Client disconnected\n");
@@ -367,11 +367,11 @@ void WebHandler::sendMusicFile() {
         int ret_code = 0;
         ret_code = sqlite3_step(stmt);
         if(ret_code == SQLITE_ROW) {
-            std::string path = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+            std::string path = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
             choosedFile = path;
             printf("music: %s\n", path.c_str());
 
-            std::string ext = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
+            std::string ext = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3));
             choosedFileExt = ext;
             /* printf("ext: %s\n", ext.c_str()); */
             found = true;
@@ -476,7 +476,7 @@ void WebHandler::sendMusicFile() {
     printf("\n\n");
 }
 
-void WebHandler::sendMusicDB() {
+void WebHandler::sendMusicsDB() {
     /* printf("\n\n"); */
     // file loading
     std::ifstream myFile;
@@ -559,6 +559,10 @@ void WebHandler::sendMusicDB() {
         printf("total size: %lu\n", totalFileSize); */
     }
     /* printf("\n\n"); */
+}
+
+void WebHandler::sendAlbumsDB() {
+    
 }
 
 void WebHandler::sendHTTPOptions() {
