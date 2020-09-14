@@ -27,10 +27,10 @@ class DatabaseHandler {
 
         std::vector<std::vector<std::string>> getFilesInDirectory(std::string path);
         // Create the server databases.
-        int createDatabases();
+        int createTables();
         // Init the server databases.
         int initDatabases(std::string path);
-        int checkDatabaseIntegrity();
+        bool isDatabaseValid();
 
         bool getIsDatabaseInitialised();
         sqlite3 *getDB();

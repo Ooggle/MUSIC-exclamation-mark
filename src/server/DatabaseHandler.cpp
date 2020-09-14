@@ -45,7 +45,7 @@ std::vector<std::vector<std::string>> DatabaseHandler::getFilesInDirectory(std::
     return filenames;
 }
 
-int DatabaseHandler::createDatabases() {
+int DatabaseHandler::createTables() {
     printf("Generating the Music! database...\n");
     
     std::string sql;
@@ -220,9 +220,26 @@ int DatabaseHandler::initDatabases(std::string path) {
     return 0;
 }
 
-int DatabaseHandler::checkDatabaseIntegrity() {
-    // TODO
-    return 0;
+bool DatabaseHandler::isDatabaseValid() {
+    char *zErrMsg = NULL;
+    int returnInt = true;
+
+    if(sqlite3_exec(db, "SELECT * FROM musics", NULL, 0, &zErrMsg) != SQLITE_OK) {
+        returnInt = false;
+    } else if(sqlite3_exec(db, "SELECT * FROM users", NULL, 0, &zErrMsg) != SQLITE_OK) {
+        returnInt = false;
+    } else if(sqlite3_exec(db, "SELECT * FROM users_musics", NULL, 0, &zErrMsg) != SQLITE_OK) {
+        returnInt = false;
+    } else if(sqlite3_exec(db, "SELECT * FROM albums", NULL, 0, &zErrMsg) != SQLITE_OK) {
+        returnInt = false;
+    }
+
+    if(returnInt == false) {
+        printf("Database integrity check failed: %s\n", zErrMsg);
+        sqlite3_free(zErrMsg);
+    }
+
+    return returnInt;
 }
 
 

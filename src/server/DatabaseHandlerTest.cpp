@@ -34,9 +34,10 @@ int main() {
         return 1;
     }
 
-    dbHandler->createDatabases();
-    dbHandler->initDatabases("tests/musics/");
-
+    if(!dbHandler->isDatabaseValid()) {
+        dbHandler->createTables();
+        dbHandler->initDatabases("tests/musics/");
+    }
 
     sqlite3 *db;
     db = dbHandler->getDB();
