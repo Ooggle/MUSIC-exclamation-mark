@@ -7,7 +7,7 @@ endpoint: /music
 method: GET
 
 parameters:
-- id: int
+- id: integer
 
 response: a direct link to the music file
 
@@ -20,7 +20,7 @@ endpoint: /music-db
 method: GET
 
 parameters:
-- id: int
+- id: integer
 
 response: a json file
 
@@ -28,16 +28,16 @@ response: a json file
 {
     "musics": [
         {
-            "album_id": int,
-            "artist": string,
-            "comment": string,
-            "filename": string,
-            "genre": string,
-            "id": int,
-            "title": string,
-            "track_number": int,
-            "year": int
-            // strings can be unicode o/ kanjis
+            "album_id":  "integer",
+            "artist":  "string",
+            "comment":  "string",
+            "filename":  "string",
+            "genre":  "string",
+            "id":  "integer",
+            "title":  "string",
+            "track_number":  "integer",
+            "year":  "integer"
+            //  "string"s can be unicode o/ kanjis
         },
         {...}
     ]
@@ -60,8 +60,8 @@ response: a json file
 
 ```json
 {
-    "message": string,
-    "result_code": int
+    "message":  "string",
+    "result_code":  "integer"
     // result code 0 = success
 }
 ```
@@ -75,24 +75,24 @@ endpoint: /get-user-infos
 method: GET
 
 parameters:
-- username: string
+- username:  "string"
 
 response: a json file
 
 ```json
 {
-    "result_code": int,
+    "result_code":  "integer",
     // result code 0 = success
     "informations": [
-        "id": int,
+        "id":  "integer",
         "directories": [
-            string,
-            string,
+             "string",
+             "string",
             {...}
             // can be empty
         ],
-        "library_revision": int,
-        "creation_date": string
+        "library_revision":  "integer",
+        "creation_date":  "string"
     ]
 }
 ```
