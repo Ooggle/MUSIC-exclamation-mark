@@ -28,15 +28,15 @@ response: a json file
 {
     "musics": [
         {
-            "album_id":  "integer",
-            "artist":  "string",
-            "comment":  "string",
-            "filename":  "string",
-            "genre":  "string",
-            "id":  "integer",
-            "title":  "string",
-            "track_number":  "integer",
-            "year":  "integer"
+            "album_id": "integer",
+            "artist": "string",
+            "comment": "string",
+            "filename": "string",
+            "genre": "string",
+            "id": "integer",
+            "title": "string",
+            "track_number": "integer",
+            "year": "integer"
         },
         {"..."}
     ]
@@ -62,8 +62,8 @@ response: a json file
 
 ```json
 {
-    "message":  "string",
-    "result_code":  "integer"
+    "message": "string",
+    "result_code": "integer"
 }
 ```
 ```
@@ -85,16 +85,18 @@ response: a json file
 
 ```json
 {
-    "result_code":  "integer",
+    "result_code": "integer",
     "informations": [
-        "id":  "integer",
+        {
+        "id": "integer",
         "directories": [
              "string",
              "string",
-            {...}
+            {"..."}
         ],
-        "library_revision":  "integer",
-        "creation_date":  "string"
+        "library_revision": "integer",
+        "creation_date": "string"
+        }
     ]
 }
 ```
