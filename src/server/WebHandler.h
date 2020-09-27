@@ -13,6 +13,7 @@
 #include "TcpServer.h"
 
 #include "DatabaseHandler.h"
+#include "json.hpp"
 
 enum LAST_REQUEST_STATUS {
     NON_INITIALIZED, // at the beginning
@@ -44,6 +45,8 @@ class WebHandler {
         std::vector<std::string> getRequestHeader();
         int parseRequest(std::vector<std::string> strSource);
         void handlerLoop();
+
+        void sendJson(nlohmann::json json);
 
         void sendForbiddenResponse();
         void sendMusicFile();

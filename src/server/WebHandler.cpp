@@ -4,7 +4,6 @@
 #include <thread>
 #include <string.h>
 #include <regex.h>
-#include "json.hpp"
 #include "WebHandler.h"
 
 WebHandler::WebHandler(std::string address, int port, sqlite3 *db) {
@@ -313,6 +312,43 @@ void WebHandler::handlerLoop() {
     
 }
 
+void WebHandler::sendJson(nlohmann::json json) {
+
+    std::string jsonDump = json.dump(4);
+
+    std::uintmax_t totalFileSize = jsonDump.size();
+    /* printf("file size : %d\n", totalFileSize); */
+
+    // header sending
+    std::string header;
+    header = "HTTP/1.1 200 OK\r\n";
+    header += "Access-Control-Allow-Origin: *\r\n";
+    header += "Content-Type: application/json\r\n";
+    header += "Content-Length: ";
+    header += std::to_string(totalFileSize);
+    header += "\r\n";
+    header += "\r\n";
+
+    // printf("%s", header.c_str());
+    tcpServer->sendData((void *)header.c_str(), header.length());
+    /* printf("header sent.\n"); */
+
+    // file sending
+    int sizeToRead = 50000;
+    char lastBuffer[sizeToRead];
+    std::uintmax_t readedSize = 0;
+    while(readedSize < totalFileSize)
+    {
+        if((readedSize + sizeToRead) > totalFileSize) {
+            sizeToRead = totalFileSize - readedSize;
+        }
+        
+        tcpServer->sendData((void *)(jsonDump.c_str() + readedSize), sizeToRead);
+        readedSize += sizeToRead;
+    }
+}
+
+
 void WebHandler::sendForbiddenResponse() {
     // header sending
     printf("sending data...");
@@ -527,44 +563,7 @@ void WebHandler::sendMusicsDB() {
 
     sqlite3_finalize(stmt);
 
-    std::string jsonDump = json.dump(4);
-
-
-
-    std::uintmax_t totalFileSize = jsonDump.size();
-    /* printf("file size : %d\n", totalFileSize); */
-
-    // header sending
-    /* printf("sending data...\n"); */
-    std::string header;
-    // audio/ogg pour ogg et flac, audio/mpeg pour mp3
-    header = "HTTP/1.1 200 OK\r\n";
-    header += "Access-Control-Allow-Origin: *\r\n";
-    header += "Content-Type: application/json\r\n";
-    header += "Content-Length: ";
-    header += std::to_string(totalFileSize);
-    header += "\r\n";
-    header += "\r\n";
-
-    // printf("%s", header.c_str());
-    tcpServer->sendData((void *)header.c_str(), header.length());
-    /* printf("header sent.\n"); */
-
-    // file sending
-    int sizeToRead = 50000;
-    char lastBuffer[sizeToRead];
-    std::uintmax_t readedSize = 0;
-    while(readedSize < totalFileSize)
-    {
-        if((readedSize + sizeToRead) > totalFileSize) {
-            sizeToRead = totalFileSize - readedSize;
-        }
-        
-        tcpServer->sendData((void *)(jsonDump.c_str() + readedSize), sizeToRead);
-        readedSize += sizeToRead;
-        /* printf("readed size: %lu\n", readedSize);
-        printf("total size: %lu\n", totalFileSize); */
-    }
+    sendJson(json);
     /* printf("\n\n"); */
 }
 
@@ -607,38 +606,7 @@ void WebHandler::createUser() {
         json["result_code"] = 2;
         json["message"] = "Error, no username provided.";
 
-        std::string jsonDump = json.dump(4);
-
-        std::uintmax_t totalFileSize = jsonDump.size();
-        /* printf("file size : %d\n", totalFileSize); */
-
-        // header sending
-        std::string header;
-        header = "HTTP/1.1 200 OK\r\n";
-        header += "Access-Control-Allow-Origin: *\r\n";
-        header += "Content-Type: application/json\r\n";
-        header += "Content-Length: ";
-        header += std::to_string(totalFileSize);
-        header += "\r\n";
-        header += "\r\n";
-
-        // printf("%s", header.c_str());
-        tcpServer->sendData((void *)header.c_str(), header.length());
-        /* printf("header sent.\n"); */
-
-        // file sending
-        int sizeToRead = 50000;
-        char lastBuffer[sizeToRead];
-        std::uintmax_t readedSize = 0;
-        while(readedSize < totalFileSize)
-        {
-            if((readedSize + sizeToRead) > totalFileSize) {
-                sizeToRead = totalFileSize - readedSize;
-            }
-            
-            tcpServer->sendData((void *)(jsonDump.c_str() + readedSize), sizeToRead);
-            readedSize += sizeToRead;
-        }
+        sendJson(json);
 
         return;
     }
@@ -656,38 +624,7 @@ void WebHandler::createUser() {
         json["result_code"] = 3;
         json["message"] = "Error, no password provided.";
 
-        std::string jsonDump = json.dump(4);
-
-        std::uintmax_t totalFileSize = jsonDump.size();
-        /* printf("file size : %d\n", totalFileSize); */
-
-        // header sending
-        std::string header;
-        header = "HTTP/1.1 200 OK\r\n";
-        header += "Access-Control-Allow-Origin: *\r\n";
-        header += "Content-Type: application/json\r\n";
-        header += "Content-Length: ";
-        header += std::to_string(totalFileSize);
-        header += "\r\n";
-        header += "\r\n";
-
-        // printf("%s", header.c_str());
-        tcpServer->sendData((void *)header.c_str(), header.length());
-        /* printf("header sent.\n"); */
-
-        // file sending
-        int sizeToRead = 50000;
-        char lastBuffer[sizeToRead];
-        std::uintmax_t readedSize = 0;
-        while(readedSize < totalFileSize)
-        {
-            if((readedSize + sizeToRead) > totalFileSize) {
-                sizeToRead = totalFileSize - readedSize;
-            }
-            
-            tcpServer->sendData((void *)(jsonDump.c_str() + readedSize), sizeToRead);
-            readedSize += sizeToRead;
-        }
+        sendJson(json);
 
         return;
     }
@@ -699,38 +636,7 @@ void WebHandler::createUser() {
         json["result_code"] = 0;
         json["message"] = "User created successfully.";
 
-        std::string jsonDump = json.dump(4);
-
-        std::uintmax_t totalFileSize = jsonDump.size();
-        /* printf("file size : %d\n", totalFileSize); */
-
-        // header sending
-        std::string header;
-        header = "HTTP/1.1 200 OK\r\n";
-        header += "Access-Control-Allow-Origin: *\r\n";
-        header += "Content-Type: application/json\r\n";
-        header += "Content-Length: ";
-        header += std::to_string(totalFileSize);
-        header += "\r\n";
-        header += "\r\n";
-
-        // printf("%s", header.c_str());
-        tcpServer->sendData((void *)header.c_str(), header.length());
-        /* printf("header sent.\n"); */
-
-        // file sending
-        int sizeToRead = 50000;
-        char lastBuffer[sizeToRead];
-        std::uintmax_t readedSize = 0;
-        while(readedSize < totalFileSize)
-        {
-            if((readedSize + sizeToRead) > totalFileSize) {
-                sizeToRead = totalFileSize - readedSize;
-            }
-            
-            tcpServer->sendData((void *)(jsonDump.c_str() + readedSize), sizeToRead);
-            readedSize += sizeToRead;
-        }
+        sendJson(json);
 
         return;
         
@@ -740,38 +646,7 @@ void WebHandler::createUser() {
         json["result_code"] = -1;
         json["message"] = errMsg.c_str();
 
-        std::string jsonDump = json.dump(4);
-
-        std::uintmax_t totalFileSize = jsonDump.size();
-        /* printf("file size : %d\n", totalFileSize); */
-
-        // header sending
-        std::string header;
-        header = "HTTP/1.1 200 OK\r\n";
-        header += "Access-Control-Allow-Origin: *\r\n";
-        header += "Content-Type: application/json\r\n";
-        header += "Content-Length: ";
-        header += std::to_string(totalFileSize);
-        header += "\r\n";
-        header += "\r\n";
-
-        // printf("%s", header.c_str());
-        tcpServer->sendData((void *)header.c_str(), header.length());
-        /* printf("header sent.\n"); */
-
-        // file sending
-        int sizeToRead = 50000;
-        char lastBuffer[sizeToRead];
-        std::uintmax_t readedSize = 0;
-        while(readedSize < totalFileSize)
-        {
-            if((readedSize + sizeToRead) > totalFileSize) {
-                sizeToRead = totalFileSize - readedSize;
-            }
-            
-            tcpServer->sendData((void *)(jsonDump.c_str() + readedSize), sizeToRead);
-            readedSize += sizeToRead;
-        }
+        sendJson(json);
 
     }
 
