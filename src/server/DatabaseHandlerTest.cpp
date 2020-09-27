@@ -40,7 +40,7 @@ int main() {
     v.push_back("aaa");
     v.push_back("bbb");
 
-    dbHandler->createUser("Ooggle", "pass", v); */
+    dbHandler->createUser("Ooggle2", "pass", v); */
 
 
     sqlite3 *db;

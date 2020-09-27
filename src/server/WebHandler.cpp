@@ -79,7 +79,7 @@ int WebHandler::parseRequest(std::vector<std::string> vectorSource) {
     regex_t reg;
 
     // Function call to create regex
-    if (regcomp(&reg, "^(GET|OPTIONS)\\s\\/(music|music-db|create-user)(\\?.*)\\sHTTP", REG_EXTENDED) != 0) {
+    if (regcomp(&reg, "^(GET|OPTIONS)\\s\\/(music|music-db|create-user|get-user-infos)(\\?.*)\\sHTTP", REG_EXTENDED) != 0) {
         printf("Compilation error.\n");
     }
     
@@ -240,7 +240,7 @@ void WebHandler::handlerLoop() {
     while(1)
     {
         tcpServer->connectAClient();
-        printf("Client connected\n");
+        //printf("Client connected\n");
 
         std::vector<std::string> requestHeader = getRequestHeader();
         if(lastRequestHasTimedOut == false) {
@@ -268,6 +268,12 @@ void WebHandler::handlerLoop() {
                         printf("Disconnecting client...\n");
                         tcpServer->disconnectAClient();
                         printf("Client disconnected\n");
+                    } else if(lastRequestEndpoint.compare("get-user-infos") == 0) {
+                        printf(" -------------- get-user-infos request -------------\n");
+                        getUserInfos();
+                        printf("Disconnecting client...\n");
+                        tcpServer->disconnectAClient();
+                        printf("Client disconnected\n");
                     } else {
                         printf(" ------------- Forbidden request -------------\n");
                         sendForbiddenResponse();
@@ -276,31 +282,31 @@ void WebHandler::handlerLoop() {
                         printf("Client disconnected\n");
                     }
                 } else if(lastRequestType.compare("OPTIONS") == 0) {
-                    printf(" -------------- OPTIONS request --------------\n");
+                    //printf(" -------------- OPTIONS request --------------\n");
                     sendHTTPOptions();
-                    printf("Disconnecting client...\n");
+                    //printf("Disconnecting client...\n");
                     tcpServer->disconnectAClient();
-                    printf("Client disconnected\n");
+                    //printf("Client disconnected\n");
                 } else {
-                    printf(" -------------- Bad request type -------------\n");
+                    //printf(" -------------- Bad request type -------------\n");
                     sendForbiddenResponse();
-                    printf("Disconnecting client...\n");
+                    //printf("Disconnecting client...\n");
                     tcpServer->disconnectAClient();
-                    printf("Client disconnected\n");
+                    //printf("Client disconnected\n");
                 }
                 
             } else {
-                printf(" ---------------- bad request ----------------\n");
+                //printf(" ---------------- bad request ----------------\n");
                 sendForbiddenResponse();
-                printf("Disconnecting client...\n");
+                //printf("Disconnecting client...\n");
                 tcpServer->disconnectAClient();
-                printf("Client disconnected\n");
+                //printf("Client disconnected\n");
             }
         } else {
-            printf(" ---------------- Timed out ----------------\n");
-            printf("Disconnecting client...\n");
+            //printf(" ---------------- Timed out ----------------\n");
+            //printf("Disconnecting client...\n");
             tcpServer->disconnectAClient();
-            printf("Client disconnected\n");
+            //printf("Client disconnected\n");
         }
         
         
@@ -351,13 +357,13 @@ void WebHandler::sendJson(nlohmann::json json) {
 
 void WebHandler::sendForbiddenResponse() {
     // header sending
-    printf("sending data...");
+    //printf("sending data...");
     std::string header;
     // audio/ogg pour ogg et flac, audio/mpeg pour mp3
     header = "HTTP/1.1 403 Forbidden\r\n";
     header += "\r\n";
 
-    printf("%s\n", "403 Forbidden");
+    //printf("%s\n", "403 Forbidden");
     tcpServer->sendData((void *)header.c_str(), header.length());
 }
 
@@ -521,12 +527,6 @@ void WebHandler::sendMusicFile() {
 
 void WebHandler::sendMusicsDB() {
     /* printf("\n\n"); */
-    // file loading
-    std::ifstream myFile;
-    myFile.open("tests/db.json", std::ios_base::out | std::ios_base::app | std::ios_base::binary);
-    if(!myFile.is_open())
-        return;
-
 
     char select[] = "SELECT * FROM musics";
     sqlite3_stmt *stmt;
@@ -649,6 +649,94 @@ void WebHandler::createUser() {
         sendJson(json);
 
     }
+
+    return;
+}
+
+void WebHandler::getUserInfos() {
+
+    std::string user;
+
+    for(int i = 0; i < lastRequestParams.size(); i++)
+    {
+        if(lastRequestParams[i].first.compare("username") == 0) {
+            user = lastRequestParams[i].second;
+            printf("user: %s\n", user.c_str());
+            break;
+        }
+    }
+
+    if(user.compare("") == 0) {
+        nlohmann::json json;
+        json["result_code"] = 2;
+        json["message"] = "Error, no username provided.";
+
+        sendJson(json);
+
+        return;
+    }
+
+    char select[] = "SELECT * FROM users WHERE username = ?";
+    sqlite3_stmt *stmt;
+    if(sqlite3_prepare_v2(db, select, -1, &stmt, NULL) != SQLITE_OK) {
+        printf("ERROR: while compiling sql: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        sqlite3_finalize(stmt);
+
+        nlohmann::json json;
+        json["result_code"] = 3;
+        json["message"] = "Request error.";
+
+        sendJson(json);
+
+        return;
+
+    }
+
+    sqlite3_bind_text(stmt, 1, user.c_str(), user.length(), NULL);
+
+    // execute sql statement to create json
+    int ret_code = 0;
+    int rownum = 0;
+    ret_code = sqlite3_step(stmt);
+    
+    if(ret_code == SQLITE_ROW) {
+
+        nlohmann::json json;
+        json["result_code"] = 0;
+
+        json["informations"]["id"] = sqlite3_column_int(stmt, 0);
+
+        int pathsSize = sqlite3_column_int(stmt, 4);
+
+        const char* paths = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3));
+
+        std::vector<std::string> pathVector;
+        dbHandler->deserialize(pathVector, paths, pathsSize);
+        printf("%s\n", paths);
+        printf("path size: %d\n", pathVector.size());
+
+        for(int i = 0; i < pathVector.size(); i++) {
+            json["informations"]["directories"][i] = pathVector[i].c_str();
+            printf("%d: %s\n", i, pathVector[i].c_str());
+        }
+
+        json["informations"]["library_revision"] = sqlite3_column_int(stmt, 5);
+        json["informations"]["creation_date"] = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6));
+
+        sendJson(json);
+    } else {
+
+        nlohmann::json json;
+        json["result_code"] = 4;
+        json["message"] = "Username not found.";
+
+        sendJson(json);
+
+        return;
+    }
+
+    sqlite3_finalize(stmt);
 
     return;
 }

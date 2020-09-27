@@ -16,3 +16,5 @@ PC player: 0%
 Web player: 0%   
 
 For now, it will support mp3, flac and ogg formats. Maybe i will add more in the future. Also, everything is WIP for the moment.
+
+To view the server API progress, feel free to visit [the dedicated page](diagrams/server/api_doc.md).

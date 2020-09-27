@@ -55,6 +55,7 @@ class WebHandler {
         void sendHTTPOptions();
 
         void createUser();
+        void getUserInfos();
 };
 
 #endif

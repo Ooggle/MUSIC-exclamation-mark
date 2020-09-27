@@ -305,7 +305,7 @@ char* DatabaseHandler::serialize(std::vector<std::string> &v, unsigned int *coun
     return buffer;
 }
 
-void DatabaseHandler::deserialize(std::vector<std::string> &restore,  char* buffer, int total_count) {
+void DatabaseHandler::deserialize(std::vector<std::string> &restore,  const char* buffer, int total_count) {
     for(int i = 0; i < total_count; i ++ ) {
         const char *begin = &buffer[i];
         int size = 0;
@@ -332,6 +332,40 @@ bool DatabaseHandler::createUser(std::string username, std::string password, std
 
         sqlite3_bind_text(stmt, 1, username.c_str(), username.length(), NULL);
         sqlite3_bind_text(stmt, 2, password.c_str(), password.length(), NULL);
+
+        /* unsigned int total_count = 0;
+        char *paths = serialize(musicPath, &total_count);
+        sqlite3_bind_text(stmt, 3, paths, total_count, NULL);
+
+        sqlite3_bind_int(stmt, 4, total_count); */ // paths size
+        sqlite3_bind_int(stmt, 3, 0); // library revision
+
+        rc = sqlite3_step(stmt);
+        if (rc != SQLITE_DONE) {
+            printf("user creation failed: %s\n", sqlite3_errmsg(db));
+            *errMsg = sqlite3_errmsg(db);
+            returnInt = false;
+        }
+    }
+
+    return returnInt;
+}
+
+bool DatabaseHandler::getUserInfos(std::string username, int *id, std::vector<std::string> *directories, std::string *errMsg) {
+
+    int rc;
+    int returnInt = true;
+
+    sqlite3_stmt *stmt = NULL;
+    rc = sqlite3_prepare_v2(db, "SELECT * FROM users WHERE username = ?", -1, &stmt, NULL);
+
+    if(rc != SQLITE_OK) {
+        printf("prepare failed: %s\n", sqlite3_errmsg(db));
+        *errMsg = sqlite3_errmsg(db);
+        returnInt = false;
+    } else {
+
+        sqlite3_bind_text(stmt, 1, username.c_str(), username.length(), NULL);
 
         /* unsigned int total_count = 0;
         char *paths = serialize(musicPath, &total_count);
