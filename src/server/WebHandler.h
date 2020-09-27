@@ -12,6 +12,8 @@
 // TCP handler class
 #include "TcpServer.h"
 
+#include "DatabaseHandler.h"
+
 enum LAST_REQUEST_STATUS {
     NON_INITIALIZED, // at the beginning
     BAD,
@@ -32,6 +34,7 @@ class WebHandler {
         bool lastRequestHasTimedOut;
 
         sqlite3 *db;
+        DatabaseHandler *dbHandler;
 
     public:
         WebHandler(std::string address, int port, sqlite3 *db);
@@ -47,6 +50,8 @@ class WebHandler {
         void sendMusicsDB();
         void sendAlbumsDB();
         void sendHTTPOptions();
+
+        void createUser();
 };
 
 #endif

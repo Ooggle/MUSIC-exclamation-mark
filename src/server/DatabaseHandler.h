@@ -34,6 +34,12 @@ class DatabaseHandler {
 
         bool getIsDatabaseInitialised();
         sqlite3 *getDB();
+
+        char* serialize(std::vector<std::string> &v, unsigned int *count);
+        void deserialize(std::vector<std::string> &restore,  char* buffer, int total_count);
+
+        bool createUser(std::string username, std::string password, std::string *errMsg);
+        bool updateUserPaths(std::vector<std::string> musicPath, std::string errMsg);
 };
 
 #endif

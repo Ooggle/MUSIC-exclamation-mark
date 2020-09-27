@@ -2,6 +2,27 @@ var audio;
 var obj;
 
 window.onload = function() {
+
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: "TITLE",
+            artist: "ARTIST",
+            album: "ALBUM",
+            artwork: [{
+                sizes: "320x180",// <- MUST BE EXACTLY!
+                src: "https://i.ytimg.com/vi/yAruCvT7P7Y/hqdefault.jpg?sqp=-oaymwEZCNACELwBSFXyq4qpAwsIARUAAIhCGAFwAQ==&rs=AOn4CLAfHWw5BHrQugGsdPYy4eIXcqMTnQ",
+                type: ""
+            }]
+        });
+    
+        navigator.mediaSession.setActionHandler('play', function () { });
+        navigator.mediaSession.setActionHandler('pause', function () { });
+        navigator.mediaSession.setActionHandler('seekbackward', function () { });
+        navigator.mediaSession.setActionHandler('seekforward', function () { });
+        navigator.mediaSession.setActionHandler('previoustrack', function () { });
+        navigator.mediaSession.setActionHandler('nexttrack', function () { });
+    }
+
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {

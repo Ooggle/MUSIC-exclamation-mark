@@ -25,9 +25,6 @@
 
 int main() {
 
-    /* WebHandler handler("localhost", 81);
-    handler.handlerLoop(); */
-
     DatabaseHandler *dbHandler = new DatabaseHandler("music.db");
 
     if(dbHandler->getIsDatabaseInitialised() == false) {
@@ -36,8 +33,15 @@ int main() {
 
     if(!dbHandler->isDatabaseValid()) {
         dbHandler->createTables();
-        dbHandler->initDatabases("tests/musics/");
+        dbHandler->initDatabases("tests/musics/"); // temp
     }
+
+    /* std::vector<std::string> v;
+    v.push_back("aaa");
+    v.push_back("bbb");
+
+    dbHandler->createUser("Ooggle", "pass", v); */
+
 
     sqlite3 *db;
     db = dbHandler->getDB();

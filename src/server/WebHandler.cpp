@@ -14,6 +14,7 @@ WebHandler::WebHandler(std::string address, int port, sqlite3 *db) {
 
     // init all attributes
     this->db = db;
+    dbHandler = new DatabaseHandler("music.db");
     lastRequestStatus = LAST_REQUEST_STATUS::NON_INITIALIZED;
     lastRequestEndpoint = "";
     lastRequestType = "";
@@ -79,7 +80,7 @@ int WebHandler::parseRequest(std::vector<std::string> vectorSource) {
     regex_t reg;
 
     // Function call to create regex
-    if (regcomp(&reg, "^(GET|OPTIONS)\\s\\/(music|music-db)(\\?.*)\\sHTTP", REG_EXTENDED) != 0) {
+    if (regcomp(&reg, "^(GET|OPTIONS)\\s\\/(music|music-db|create-user)(\\?.*)\\sHTTP", REG_EXTENDED) != 0) {
         printf("Compilation error.\n");
     }
     
@@ -259,6 +260,12 @@ void WebHandler::handlerLoop() {
                     } else if(lastRequestEndpoint.compare("music-db") == 0) {
                         printf(" -------------- music-db request -------------\n");
                         sendMusicsDB();
+                        printf("Disconnecting client...\n");
+                        tcpServer->disconnectAClient();
+                        printf("Client disconnected\n");
+                    } else if(lastRequestEndpoint.compare("create-user") == 0) {
+                        printf(" -------------- create-user request -------------\n");
+                        createUser();
                         printf("Disconnecting client...\n");
                         tcpServer->disconnectAClient();
                         printf("Client disconnected\n");
@@ -580,4 +587,193 @@ void WebHandler::sendHTTPOptions() {
     tcpServer->sendData((void *)header.c_str(), header.length());
 
     /* printf("\n\n"); */
+}
+
+void WebHandler::createUser() {
+
+    std::string user, password;
+
+    for(int i = 0; i < lastRequestParams.size(); i++)
+    {
+        if(lastRequestParams[i].first.compare("username") == 0) {
+            user = lastRequestParams[i].second;
+            printf("user: %s\n", user.c_str());
+            break;
+        }
+    }
+
+    if(user.compare("") == 0) {
+        nlohmann::json json;
+        json["result_code"] = 2;
+        json["message"] = "Error, no username provided.";
+
+        std::string jsonDump = json.dump(4);
+
+        std::uintmax_t totalFileSize = jsonDump.size();
+        /* printf("file size : %d\n", totalFileSize); */
+
+        // header sending
+        std::string header;
+        header = "HTTP/1.1 200 OK\r\n";
+        header += "Access-Control-Allow-Origin: *\r\n";
+        header += "Content-Type: application/json\r\n";
+        header += "Content-Length: ";
+        header += std::to_string(totalFileSize);
+        header += "\r\n";
+        header += "\r\n";
+
+        // printf("%s", header.c_str());
+        tcpServer->sendData((void *)header.c_str(), header.length());
+        /* printf("header sent.\n"); */
+
+        // file sending
+        int sizeToRead = 50000;
+        char lastBuffer[sizeToRead];
+        std::uintmax_t readedSize = 0;
+        while(readedSize < totalFileSize)
+        {
+            if((readedSize + sizeToRead) > totalFileSize) {
+                sizeToRead = totalFileSize - readedSize;
+            }
+            
+            tcpServer->sendData((void *)(jsonDump.c_str() + readedSize), sizeToRead);
+            readedSize += sizeToRead;
+        }
+
+        return;
+    }
+
+    for(int i = 0; i < lastRequestParams.size(); i++)
+    {
+        if(lastRequestParams[i].first.compare("password") == 0) {
+            password = lastRequestParams[i].second;
+            break;
+        }
+    }
+
+    if(password.compare("") == 0) {
+        nlohmann::json json;
+        json["result_code"] = 3;
+        json["message"] = "Error, no password provided.";
+
+        std::string jsonDump = json.dump(4);
+
+        std::uintmax_t totalFileSize = jsonDump.size();
+        /* printf("file size : %d\n", totalFileSize); */
+
+        // header sending
+        std::string header;
+        header = "HTTP/1.1 200 OK\r\n";
+        header += "Access-Control-Allow-Origin: *\r\n";
+        header += "Content-Type: application/json\r\n";
+        header += "Content-Length: ";
+        header += std::to_string(totalFileSize);
+        header += "\r\n";
+        header += "\r\n";
+
+        // printf("%s", header.c_str());
+        tcpServer->sendData((void *)header.c_str(), header.length());
+        /* printf("header sent.\n"); */
+
+        // file sending
+        int sizeToRead = 50000;
+        char lastBuffer[sizeToRead];
+        std::uintmax_t readedSize = 0;
+        while(readedSize < totalFileSize)
+        {
+            if((readedSize + sizeToRead) > totalFileSize) {
+                sizeToRead = totalFileSize - readedSize;
+            }
+            
+            tcpServer->sendData((void *)(jsonDump.c_str() + readedSize), sizeToRead);
+            readedSize += sizeToRead;
+        }
+
+        return;
+    }
+
+    std::string errMsg;
+    if(dbHandler->createUser(user, password, &errMsg)) {
+
+        nlohmann::json json;
+        json["result_code"] = 0;
+        json["message"] = "User created successfully.";
+
+        std::string jsonDump = json.dump(4);
+
+        std::uintmax_t totalFileSize = jsonDump.size();
+        /* printf("file size : %d\n", totalFileSize); */
+
+        // header sending
+        std::string header;
+        header = "HTTP/1.1 200 OK\r\n";
+        header += "Access-Control-Allow-Origin: *\r\n";
+        header += "Content-Type: application/json\r\n";
+        header += "Content-Length: ";
+        header += std::to_string(totalFileSize);
+        header += "\r\n";
+        header += "\r\n";
+
+        // printf("%s", header.c_str());
+        tcpServer->sendData((void *)header.c_str(), header.length());
+        /* printf("header sent.\n"); */
+
+        // file sending
+        int sizeToRead = 50000;
+        char lastBuffer[sizeToRead];
+        std::uintmax_t readedSize = 0;
+        while(readedSize < totalFileSize)
+        {
+            if((readedSize + sizeToRead) > totalFileSize) {
+                sizeToRead = totalFileSize - readedSize;
+            }
+            
+            tcpServer->sendData((void *)(jsonDump.c_str() + readedSize), sizeToRead);
+            readedSize += sizeToRead;
+        }
+
+        return;
+        
+    } else {
+
+        nlohmann::json json;
+        json["result_code"] = -1;
+        json["message"] = errMsg.c_str();
+
+        std::string jsonDump = json.dump(4);
+
+        std::uintmax_t totalFileSize = jsonDump.size();
+        /* printf("file size : %d\n", totalFileSize); */
+
+        // header sending
+        std::string header;
+        header = "HTTP/1.1 200 OK\r\n";
+        header += "Access-Control-Allow-Origin: *\r\n";
+        header += "Content-Type: application/json\r\n";
+        header += "Content-Length: ";
+        header += std::to_string(totalFileSize);
+        header += "\r\n";
+        header += "\r\n";
+
+        // printf("%s", header.c_str());
+        tcpServer->sendData((void *)header.c_str(), header.length());
+        /* printf("header sent.\n"); */
+
+        // file sending
+        int sizeToRead = 50000;
+        char lastBuffer[sizeToRead];
+        std::uintmax_t readedSize = 0;
+        while(readedSize < totalFileSize)
+        {
+            if((readedSize + sizeToRead) > totalFileSize) {
+                sizeToRead = totalFileSize - readedSize;
+            }
+            
+            tcpServer->sendData((void *)(jsonDump.c_str() + readedSize), sizeToRead);
+            readedSize += sizeToRead;
+        }
+
+    }
+
+    return;
 }
