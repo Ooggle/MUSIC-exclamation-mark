@@ -37,11 +37,13 @@ response: a json file
             "title":  "string",
             "track_number":  "integer",
             "year":  "integer"
-            //  "string"s can be unicode o/ kanjis
         },
-        {...}
+        {"..."}
     ]
 }
+```
+```
+strings can be unicode, o/ kanjis
 ```
 
 <br>
@@ -62,8 +64,10 @@ response: a json file
 {
     "message":  "string",
     "result_code":  "integer"
-    // result code 0 = success
 }
+```
+```
+"result_code": 0 = success
 ```
 
 <br>
@@ -82,19 +86,21 @@ response: a json file
 ```json
 {
     "result_code":  "integer",
-    // result code 0 = success
     "informations": [
         "id":  "integer",
         "directories": [
              "string",
              "string",
             {...}
-            // can be empty
         ],
         "library_revision":  "integer",
         "creation_date":  "string"
     ]
 }
+```
+```
+"result_code": 0 = success
+"directories" node can be empty or not present
 ```
 
 <br>
