@@ -90,8 +90,8 @@ response: a json file
         {
         "id": "integer",
         "directories": [
-             "string",
-             "string",
+            "string",
+            "string",
             {"..."}
         ],
         "library_revision": "integer",

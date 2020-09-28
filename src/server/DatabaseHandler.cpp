@@ -99,7 +99,7 @@ int DatabaseHandler::createTables() {
             username        VARCHAR(250) NOT NULL UNIQUE,\
             password_crypt  VARCHAR(500) NOT NULL,\
             musics_paths    TEXT(10000),\
-            paths_size    INTEGER,\
+            paths_size      INTEGER,\
             library_revision    INTEGER,\
             creation_date   DATETIME\
         )";
@@ -114,11 +114,11 @@ int DatabaseHandler::createTables() {
     }
 
 
-    /* CREATE TABLE users_musics */
-    sql = "CREATE TABLE users_musics (\
+    /* CREATE TABLE artists */
+    sql = "CREATE TABLE artists (\
             id              INTEGER PRIMARY KEY,\
-            user_id         INTEGER,\
-            music_id        INTEGER\
+            name            VARCHAR(500),\
+            artist_image    BLOB\
         )";
 
     rc = sqlite3_exec(db, sql.c_str(), NULL, 0, &zErrMsg);
@@ -127,15 +127,15 @@ int DatabaseHandler::createTables() {
         fprintf(stderr, "SQL error: %s\n", zErrMsg);
         sqlite3_free(zErrMsg);
     } else {
-        //printf("Table users_musics created successfully\n");
+        //printf("Table artists created successfully\n");
     }
 
 
     /* CREATE TABLE albums */
     sql = "CREATE TABLE albums (\
             id              INTEGER PRIMARY KEY,\
-            name         VARCHAR(500),\
-            artist        VARCHAR(500),\
+            name            VARCHAR(500),\
+            artist_id       INTEGER,\
             cover_image     BLOB\
         )";
 
@@ -255,9 +255,9 @@ bool DatabaseHandler::isDatabaseValid() {
         returnInt = false;
     } else if(sqlite3_exec(db, "SELECT * FROM users", NULL, 0, &zErrMsg) != SQLITE_OK) {
         returnInt = false;
-    } else if(sqlite3_exec(db, "SELECT * FROM users_musics", NULL, 0, &zErrMsg) != SQLITE_OK) {
-        returnInt = false;
     } else if(sqlite3_exec(db, "SELECT * FROM albums", NULL, 0, &zErrMsg) != SQLITE_OK) {
+        returnInt = false;
+    } else if(sqlite3_exec(db, "SELECT * FROM artists", NULL, 0, &zErrMsg) != SQLITE_OK) {
         returnInt = false;
     } else if(sqlite3_exec(db, "SELECT * FROM database_informations", NULL, 0, &zErrMsg) != SQLITE_OK) {
         returnInt = false;
