@@ -73,6 +73,7 @@ int DatabaseHandler::createTables() {
             filename        VARCHAR(5000),\
             path            VARCHAR(5000),\
             extension       VARCHAR(10),\
+            user_id         INTEGER,\
             album_id        INTEGER,\
             genre           VARCHAR(100),\
             track_number    INTEGER,\
@@ -135,6 +136,7 @@ int DatabaseHandler::createTables() {
     sql = "CREATE TABLE albums (\
             id              INTEGER PRIMARY KEY,\
             name            VARCHAR(500),\
+            user_id         INTEGER,\
             artist_id       INTEGER,\
             cover_image     BLOB\
         )";
@@ -164,7 +166,7 @@ int DatabaseHandler::createTables() {
     return 0;
 }
 
-int DatabaseHandler::initDatabases(std::string path) {
+int DatabaseHandler::addMusicsforUser(std::string path, std::string username) {
     std::vector<std::vector<std::string>> filenames = getFilesInDirectory(path);
 
     // print vector of strings
@@ -172,6 +174,29 @@ int DatabaseHandler::initDatabases(std::string path) {
     for(int i = 0; i < filenames.size(); i++){ 
         printf("%s\n", filenames[i].c_str());
     } */
+
+    // Verify username
+    int rc, username_id;
+
+    sqlite3_stmt *stmt = NULL;
+    rc = sqlite3_prepare_v2(db, "SELECT * FROM users WHERE username = ?", -1, &stmt, NULL);
+
+    if(rc != SQLITE_OK) {
+        printf("prepare failed: %s\n", sqlite3_errmsg(db));
+        return false;
+    } else {
+
+        sqlite3_bind_text(stmt, 1, username.c_str(), username.length(), NULL);
+        
+        rc = sqlite3_step(stmt);
+
+        if(rc == SQLITE_ROW) {
+            username_id = sqlite3_column_int(stmt, 0);
+        } else{
+            printf("Cannot add music(s): %s\n", sqlite3_errmsg(db));
+            return -1;
+        }
+    }
 
     TagLib::String fTitle;
     TagLib::String fArtist;
@@ -181,10 +206,8 @@ int DatabaseHandler::initDatabases(std::string path) {
     unsigned int fTrack;
     unsigned int fYear;
 
-    int rc;
-
-    sqlite3_stmt *stmt = NULL;
-    rc = sqlite3_prepare_v2(db, "INSERT INTO musics(path, filename, extension, album_id, genre, track_number, comment, title, artist, year) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", -1, &stmt, NULL);
+    stmt = NULL;
+    rc = sqlite3_prepare_v2(db, "INSERT INTO musics(path, filename, extension, user_id, album_id, genre, track_number, comment, title, artist, year) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", -1, &stmt, NULL);
 
     if(rc != SQLITE_OK) {
         printf("prepare failed: %s\n", sqlite3_errmsg(db));
@@ -221,16 +244,43 @@ int DatabaseHandler::initDatabases(std::string path) {
             strcpy(artist, fArtist.toCString(true));
             int artistLength = sprintf(artist, "%s", artist);
 
+
+            // Verify username
+            int rc2;
+
+            sqlite3_stmt *stmt2 = NULL;
+            rc2 = sqlite3_prepare_v2(db, "SELECT * FROM albums WHERE username = ?", -1, &stmt2, NULL);
+
+            if(rc2 != SQLITE_OK) {
+                printf("prepare failed: %s\n", sqlite3_errmsg(db));
+                return false;
+            } else {
+
+                sqlite3_bind_text(stmt2, 1, username.c_str(), username.length(), NULL);
+                
+                rc2 = sqlite3_step(stmt2);
+
+                if(rc2 == SQLITE_ROW) {
+                    username_id = sqlite3_column_int(stmt2, 0);
+                } else{
+                    printf("Cannot add music(s), user not found.\n");
+                    printf("int code: %d, msg: %s\n", rc2, sqlite3_errmsg(db));
+                    return -1;
+                }
+            }
+
+
             sqlite3_bind_text(stmt, 1, filenames[i].at(0).c_str(), filenames[i].at(0).length(), NULL); //path
             sqlite3_bind_text(stmt, 2, filenames[i].at(1).c_str(), filenames[i].at(1).length(), NULL); //filename
             sqlite3_bind_text(stmt, 3, filenames[i].at(2).c_str(), filenames[i].at(2).length(), NULL); //extension
-            sqlite3_bind_int(stmt, 4, 1); //TODO, album ID
-            sqlite3_bind_text(stmt, 5, genre, genreLength, NULL); //genre
-            sqlite3_bind_int(stmt, 6, fTrack);
-            sqlite3_bind_text(stmt, 7, comment, commentLength, NULL);
-            sqlite3_bind_text(stmt, 8, title, titleLength, NULL);
-            sqlite3_bind_text(stmt, 9, artist, artistLength, NULL);
-            sqlite3_bind_int(stmt, 10, fYear);
+            sqlite3_bind_int(stmt, 4, username_id); //user_id TODO
+            sqlite3_bind_int(stmt, 5, 1); //album ID TODO
+            sqlite3_bind_text(stmt, 6, genre, genreLength, NULL); //genre
+            sqlite3_bind_int(stmt, 7, fTrack);
+            sqlite3_bind_text(stmt, 8, comment, commentLength, NULL);
+            sqlite3_bind_text(stmt, 9, title, titleLength, NULL);
+            sqlite3_bind_text(stmt, 10, artist, artistLength, NULL);
+            sqlite3_bind_int(stmt, 11, fYear);
             
 
             rc = sqlite3_step(stmt);
@@ -376,7 +426,7 @@ bool DatabaseHandler::getUserInfos(std::string username, int *id, std::vector<st
 
         rc = sqlite3_step(stmt);
         if (rc != SQLITE_DONE) {
-            printf("user creation failed: %s\n", sqlite3_errmsg(db));
+            printf("user fetch error: %s\n", sqlite3_errmsg(db));
             *errMsg = sqlite3_errmsg(db);
             returnInt = false;
         }

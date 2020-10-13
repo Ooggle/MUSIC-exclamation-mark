@@ -550,13 +550,13 @@ void WebHandler::sendMusicsDB() {
 
         json["musics"][rownum]["id"] = sqlite3_column_int(stmt, 0);
         json["musics"][rownum]["filename"] = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
-        json["musics"][rownum]["album_id"] = sqlite3_column_int(stmt, 4);
-        json["musics"][rownum]["genre"] = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 5));
-        json["musics"][rownum]["track_number"] = sqlite3_column_int(stmt, 6);
-        json["musics"][rownum]["comment"] = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 7));
-        json["musics"][rownum]["title"] = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 8));
-        json["musics"][rownum]["artist"] = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 9));
-        json["musics"][rownum]["year"] = sqlite3_column_int(stmt, 10);
+        json["musics"][rownum]["album_id"] = sqlite3_column_int(stmt, 5);
+        json["musics"][rownum]["genre"] = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6));
+        json["musics"][rownum]["track_number"] = sqlite3_column_int(stmt, 7);
+        json["musics"][rownum]["comment"] = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 8));
+        json["musics"][rownum]["title"] = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 9));
+        json["musics"][rownum]["artist"] = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 10));
+        json["musics"][rownum]["year"] = sqlite3_column_int(stmt, 11);
 
         rownum += 1;
     }

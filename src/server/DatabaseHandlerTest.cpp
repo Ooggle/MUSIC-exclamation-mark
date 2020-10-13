@@ -33,7 +33,12 @@ int main() {
 
     if(!dbHandler->isDatabaseValid()) {
         dbHandler->createTables();
-        dbHandler->initDatabases("tests/musics/"); // temp
+
+        std::string *errMsg;
+        if(dbHandler->createUser("Ooggle", "password", errMsg) == false) {
+            printf("cannot create user: %s\n", errMsg->c_str());
+        }
+        dbHandler->addMusicsforUser("tests/musics/", "Ooggle");
     }
 
     /* std::vector<std::string> v;
