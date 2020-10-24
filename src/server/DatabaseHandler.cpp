@@ -301,6 +301,35 @@ bool DatabaseHandler::getIsDatabaseInitialised() {
     return isDatabaseInitialised;
 }
 
+bool DatabaseHandler::isMusicExistForUser(std::string title, std::string artist, std::string genre, int track_number, std::string album_name) {
+
+    int rc, returnInt = false;
+
+    sqlite3_stmt *stmt = NULL;
+    sqlite3_prepare_v2(db, "SELECT * FROM musics WHERE title = ?, genre = ?, track_number = ?", -1, &stmt, NULL);
+
+    if(rc != SQLITE_OK)
+    {
+        printf("prepare failed: %s", sqlite3_errmsg(db));
+        returnInt = false;
+    } else {
+        sqlite3_bind_text(stmt, 1, title.c_str(), title.length(), NULL);
+        sqlite3_bind_text(stmt, 2, genre.c_str(), genre.length(), NULL);
+        sqlite3_bind_int(stmt, 1, track_number);
+
+        rc = sqlite3_step(stmt);
+
+        if(rc == SQLITE_ROW) {
+            returnInt = true;
+        }
+    }
+    
+    // need to add verification for album infos too.
+
+    return returnInt;
+}
+
+
 sqlite3 *DatabaseHandler::getDB() {
     return db;
 }

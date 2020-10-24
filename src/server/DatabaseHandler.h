@@ -34,6 +34,7 @@ class DatabaseHandler {
         bool isDatabaseValid();
 
         bool getIsDatabaseInitialised();
+        bool isMusicExistForUser(std::string title, std::string artist, std::string genre, int track_number, std::string album_name);
         int getUserID(std::string username);
         sqlite3 *getDB();
 
