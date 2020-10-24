@@ -23,7 +23,8 @@
 #include "DatabaseHandler.h"
 
 
-int main() {
+int main()
+{
 
     DatabaseHandler *dbHandler = new DatabaseHandler("music.db");
 
@@ -70,7 +71,8 @@ int main() {
 
     // execute sql statement, and while there are rows returned, print ID
     int ret_code = 0;
-    while((ret_code = sqlite3_step(stmt)) == SQLITE_ROW) {
+    while((ret_code = sqlite3_step(stmt)) == SQLITE_ROW)
+    {
         const unsigned char *name = sqlite3_column_text(stmt, 1);
         printf("TEST: ID = %d\n", sqlite3_column_int(stmt, 0));
         printf("TEST: name = %s\n", name);

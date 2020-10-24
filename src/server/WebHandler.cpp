@@ -6,7 +6,8 @@
 #include <regex.h>
 #include "WebHandler.h"
 
-WebHandler::WebHandler(std::string address, int port, sqlite3 *db) {
+WebHandler::WebHandler(std::string address, int port, sqlite3 *db)
+{
     tcpServer = new TcpServer();
     tcpServer->openServer(address, port);
     printf("Server opened\n");
@@ -24,12 +25,14 @@ WebHandler::WebHandler(std::string address, int port, sqlite3 *db) {
     lastRequestHasTimedOut = false;
 }
 
-WebHandler::~WebHandler() {
+WebHandler::~WebHandler()
+{
     tcpServer->closeServer();
     delete tcpServer;
 }
 
-std::string WebHandler::getRequestLine() {
+std::string WebHandler::getRequestLine()
+{
     uint8_t data = 0;
     std::string line = "";
     int timeout = 0, rc = 0;
@@ -184,7 +187,8 @@ int WebHandler::parseRequest(std::vector<std::string> vectorSource) {
         std::string paramValue;
         bool noMoreGroups = false;
         
-        while(regexec(&reg, source + last_match, maxGroups, groupArray2, 0) == 0) {
+        while(regexec(&reg, source + last_match, maxGroups, groupArray2, 0) == 0)
+        {
             g = 0;
             Numparams += 1;
             for(g = 0; g < maxGroups; g++)
@@ -235,7 +239,8 @@ int WebHandler::parseRequest(std::vector<std::string> vectorSource) {
     return 0;
 }
 
-void WebHandler::handlerLoop() {
+void WebHandler::handlerLoop()
+{
     
     while(1)
     {
@@ -249,8 +254,7 @@ void WebHandler::handlerLoop() {
             
             printf("%s\n", lastRequestType.c_str());
             if(lastRequestStatus == LAST_REQUEST_STATUS::GOOD) {
-                if(lastRequestType.compare("GET") == 0)
-                {
+                if(lastRequestType.compare("GET") == 0) {
                     if(lastRequestEndpoint.compare("music") == 0) {
                         printf(" --------------- music request ---------------\n");
                         sendMusicFile();
@@ -319,7 +323,8 @@ void WebHandler::handlerLoop() {
     
 }
 
-void WebHandler::sendJson(nlohmann::json json) {
+void WebHandler::sendJson(nlohmann::json json)
+{
 
     std::string jsonDump = json.dump(4);
 
@@ -356,7 +361,8 @@ void WebHandler::sendJson(nlohmann::json json) {
 }
 
 
-void WebHandler::sendForbiddenResponse() {
+void WebHandler::sendForbiddenResponse()
+{
     // header sending
     //printf("sending data...");
     std::string header;
@@ -368,7 +374,8 @@ void WebHandler::sendForbiddenResponse() {
     tcpServer->sendData((void *)header.c_str(), header.length());
 }
 
-void WebHandler::sendMusicFile() {
+void WebHandler::sendMusicFile()
+{
     printf("\n\n");
 
     std::uintmax_t byteToStartFrom = 0;
@@ -450,8 +457,7 @@ void WebHandler::sendMusicFile() {
         return;
     
     // seek to start position
-    if(byteToStartFrom > 0)
-    {
+    if(byteToStartFrom > 0) {
         myFile.seekg(byteToStartFrom, std::ios::beg);
     }
     
@@ -470,8 +476,7 @@ void WebHandler::sendMusicFile() {
     }
     
     header += "Cache-Control: no-cache, private\r\n";
-    if(choosedFileExt.compare(".flac") == 0)
-    {
+    if(choosedFileExt.compare(".flac") == 0) {
         header += "Content-Type: audio/flac\r\n";
     } else if(choosedFileExt.compare(".mp3") == 0) {
         header += "Content-Type: audio/mpeg\r\n";
@@ -481,8 +486,7 @@ void WebHandler::sendMusicFile() {
     
     header += "Accept-Ranges: bytes\r\n";
 
-    if(lastRequestHasContentRange)
-    {
+    if(lastRequestHasContentRange) {
         char tempbuffer[150];
         sprintf(tempbuffer, "Content-Range: bytes %lu-%lu/%lu\r\n", byteToStartFrom, totalFileSize - 1, totalFileSize);
         std::string buffsprintf = tempbuffer;
@@ -547,7 +551,8 @@ void WebHandler::sendMusicsDB() {
     // execute sql statement to create json
     int ret_code = 0;
     int rownum = 0;
-    while((ret_code = sqlite3_step(stmt)) == SQLITE_ROW) {
+    while((ret_code = sqlite3_step(stmt)) == SQLITE_ROW)
+    {
 
         json["musics"][rownum]["id"] = sqlite3_column_int(stmt, 0);
         json["musics"][rownum]["filename"] = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
@@ -568,11 +573,13 @@ void WebHandler::sendMusicsDB() {
     /* printf("\n\n"); */
 }
 
-void WebHandler::sendAlbumsDB() {
+void WebHandler::sendAlbumsDB()
+{
     
 }
 
-void WebHandler::sendHTTPOptions() {
+void WebHandler::sendHTTPOptions()
+{
     /* printf("\n\n"); */
     // header sending
     /* printf("sending data..."); */
@@ -589,7 +596,8 @@ void WebHandler::sendHTTPOptions() {
     /* printf("\n\n"); */
 }
 
-void WebHandler::createUser() {
+void WebHandler::createUser()
+{
 
     std::string user, password;
 
@@ -654,7 +662,8 @@ void WebHandler::createUser() {
     return;
 }
 
-void WebHandler::getUserInfos() {
+void WebHandler::getUserInfos()
+{
 
     std::string user;
 
@@ -717,7 +726,8 @@ void WebHandler::getUserInfos() {
         printf("%s\n", paths);
         printf("path size: %d\n", pathVector.size());
 
-        for(int i = 0; i < pathVector.size(); i++) {
+        for(int i = 0; i < pathVector.size(); i++)
+        {
             json["informations"]["directories"][i] = pathVector[i].c_str();
             printf("%d: %s\n", i, pathVector[i].c_str());
         }

@@ -10,7 +10,8 @@
 
 #define SERVER_VERSION 0.1
 
-int main() {
+int main()
+{
     printf("Welcome to MUSIC! server %2.1F.\n", SERVER_VERSION);
 
     return EXIT_SUCCESS;

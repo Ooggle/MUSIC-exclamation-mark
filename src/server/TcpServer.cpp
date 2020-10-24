@@ -13,14 +13,16 @@
 #include <arpa/inet.h>
 
 
-TcpServer::TcpServer():socketWaitClient(-1),socketDialogueClient(-1){
-}
+TcpServer::TcpServer():socketWaitClient(-1),socketDialogueClient(-1)
+{}
 
-TcpServer::~TcpServer(){
+TcpServer::~TcpServer()
+{
 	this->closeServer();
 }
 
-void TcpServer::openServer(std::string address, uint16_t port, int32_t nbPlaces) {
+void TcpServer::openServer(std::string address, uint16_t port, int32_t nbPlaces)
+{
 	int ctrl;
 	struct sockaddr_in serverAdress;
 
@@ -52,29 +54,34 @@ void TcpServer::openServer(std::string address, uint16_t port, int32_t nbPlaces)
 	listen(this->socketWaitClient, nbPlaces);
 }
 
-void TcpServer::closeServer() {
+void TcpServer::closeServer()
+{
 	this->disconnectAClient();
 	shutdown(this->socketWaitClient,SHUT_RDWR);
 	close(this->socketWaitClient);
 	this->socketWaitClient=-1;
 }
 
-ssize_t TcpServer::getData(void* data, uint32_t dataMaxSize) {
+ssize_t TcpServer::getData(void* data, uint32_t dataMaxSize)
+{
 	return recv(this->socketDialogueClient, data, dataMaxSize, MSG_DONTWAIT);
 }
 
-ssize_t TcpServer::getDataBlocking(void* data, uint32_t dataMaxSize) {
+ssize_t TcpServer::getDataBlocking(void* data, uint32_t dataMaxSize)
+{
 	return recv(this->socketDialogueClient, data, dataMaxSize, MSG_WAITALL);
 }
 
-int TcpServer::sendData(void* data, uint32_t nbBytes) {
+int TcpServer::sendData(void* data, uint32_t nbBytes)
+{
 	if(send(this->socketDialogueClient, data, nbBytes, MSG_NOSIGNAL) == -1) {
 		return -1;
 	}
 	return 0;
 }
 
-void TcpServer::connectAClient() {
+void TcpServer::connectAClient()
+{
 	socklen_t tailleAdresseClient;
 	struct sockaddr_in adresseClient;
 	tailleAdresseClient = sizeof(struct sockaddr_in);
@@ -84,7 +91,8 @@ void TcpServer::connectAClient() {
 	} while(this->socketDialogueClient == -1);
 }
 
-void TcpServer::disconnectAClient() {
+void TcpServer::disconnectAClient()
+{
 	shutdown(this->socketDialogueClient,SHUT_RDWR);
 	close(this->socketDialogueClient);
 	this->socketDialogueClient=-1;

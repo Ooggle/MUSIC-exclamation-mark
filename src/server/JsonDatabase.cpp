@@ -1,27 +1,34 @@
-#include "Database.h"
+#include "JsonDatabase.h"
 
 using json = nlohmann::json;
 namespace fs = std::filesystem;
 
-Database::Database(std::string databaseName) {
-
-}
-Database::~Database() {
-
-}
-
-void Database::initDatabase() {
+JsonDatabase::Database(std::string databaseName)
+{
 
 }
 
-void Database::makeDatabaseBakup() {
+JsonDatabase::~Database()
+{
+
+}
+
+void JsonDatabase::initDatabase()
+{
+
+}
+
+void JsonDatabase::makeDatabaseBakup()
+{
     
 }
 
-int Database::get_databaseContent() {
+int JsonDatabase::get_databaseContent()
+{
     return this->databaseContent;
 }
 
-int Database::get_dbState() {
+int JsonDatabase::get_dbState()
+{
     return this->dbState;
 }

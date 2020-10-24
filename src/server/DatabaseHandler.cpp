@@ -1,6 +1,7 @@
 #include "DatabaseHandler.h"
 
-DatabaseHandler::DatabaseHandler(std::string DatabasePath) {
+DatabaseHandler::DatabaseHandler(std::string DatabasePath)
+{
     char *zErrMsg = NULL;
 
     if(sqlite3_open(DatabasePath.c_str(), &db)) {
@@ -12,15 +13,18 @@ DatabaseHandler::DatabaseHandler(std::string DatabasePath) {
     }
 }
 
-DatabaseHandler::~DatabaseHandler() {
+DatabaseHandler::~DatabaseHandler()
+{
     sqlite3_close(db);
 }
 
-std::vector<std::vector<std::string>> DatabaseHandler::getFilesInDirectory(std::string path) {
+std::vector<std::vector<std::string>> DatabaseHandler::getFilesInDirectory(std::string path)
+{
     std::vector<std::vector<std::string>> filenames;
     int i = 0;
 
-    for(const auto & entry : std::filesystem::directory_iterator(path)) {
+    for(const auto & entry : std::filesystem::directory_iterator(path))
+    {
         //std::cout << entry.path() << ", directory: " << entry.is_directory() << std::endl;
         if(entry.is_directory()) {
             std::vector<std::vector<std::string>> filenamesTemp = getFilesInDirectory(entry.path());
@@ -45,7 +49,8 @@ std::vector<std::vector<std::string>> DatabaseHandler::getFilesInDirectory(std::
     return filenames;
 }
 
-int DatabaseHandler::createTables() {
+int DatabaseHandler::createTables()
+{
     printf("Generating the Music! database...\n");
     
     std::string sql;
@@ -60,7 +65,7 @@ int DatabaseHandler::createTables() {
 
     rc = sqlite3_exec(db, sql.c_str(), NULL, 0, &zErrMsg);
 
-    if( rc != SQLITE_OK ){
+    if(rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", zErrMsg);
         sqlite3_free(zErrMsg);
     } else {
@@ -85,7 +90,7 @@ int DatabaseHandler::createTables() {
 
     rc = sqlite3_exec(db, sql.c_str(), NULL, 0, &zErrMsg);
 
-    if( rc != SQLITE_OK ){
+    if(rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", zErrMsg);
         sqlite3_free(zErrMsg);
     } else {
@@ -107,7 +112,7 @@ int DatabaseHandler::createTables() {
 
     rc = sqlite3_exec(db, sql.c_str(), NULL, 0, &zErrMsg);
 
-    if( rc != SQLITE_OK ){
+    if(rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", zErrMsg);
         sqlite3_free(zErrMsg);
     } else {
@@ -124,7 +129,7 @@ int DatabaseHandler::createTables() {
 
     rc = sqlite3_exec(db, sql.c_str(), NULL, 0, &zErrMsg);
 
-    if( rc != SQLITE_OK ){
+    if(rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", zErrMsg);
         sqlite3_free(zErrMsg);
     } else {
@@ -143,7 +148,7 @@ int DatabaseHandler::createTables() {
 
     rc = sqlite3_exec(db, sql.c_str(), NULL, 0, &zErrMsg);
 
-    if( rc != SQLITE_OK ){
+    if(rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", zErrMsg);
         sqlite3_free(zErrMsg);
     } else {
@@ -154,7 +159,7 @@ int DatabaseHandler::createTables() {
     sqlite3_stmt *stmt = NULL;
     rc = sqlite3_exec(db, "INSERT INTO database_informations(description, creation_date) VALUES('', DATETIME('now','localtime'))", NULL, 0, &zErrMsg);
 
-    if( rc != SQLITE_OK ){
+    if(rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", zErrMsg);
         sqlite3_free(zErrMsg);
     } else {
@@ -166,38 +171,36 @@ int DatabaseHandler::createTables() {
     return 0;
 }
 
-int DatabaseHandler::addMusicsforUser(std::string path, std::string username) {
+int DatabaseHandler::addMusicsforUser(std::string path, std::string username)
+{
     std::vector<std::vector<std::string>> filenames = getFilesInDirectory(path);
 
     // print vector of strings
     /* printf("\n      -- ALL FILES --\n");
-    for(int i = 0; i < filenames.size(); i++){ 
+    for(int i = 0; i < filenames.size(); i++)
+    { 
         printf("%s\n", filenames[i].c_str());
     } */
 
     // Verify username
     int username_id = getUserID(username);
-    if(username_id == -1)
-    {
+    if(username_id == -1) {
         printf("Cannot add music(s), user not found\n");
         return -1;
     }
 
-    for(int i = 0; i < filenames.size(); i++){
-
+    for(int i = 0; i < filenames.size(); i++)
         addMusicforUser(filenames[i], username);
-        
-    }
 
     return 0;
 }
 
-int DatabaseHandler::addMusicforUser(std::vector<std::string> file, std::string username) {
+int DatabaseHandler::addMusicforUser(std::vector<std::string> file, std::string username)
+{
 
     // Verify username
     int username_id = getUserID(username);
-    if(username_id == -1)
-    {
+    if(username_id == -1) {
         printf("Cannot add music, user not found\n");
         return -1;
     }
@@ -272,7 +275,8 @@ int DatabaseHandler::addMusicforUser(std::vector<std::string> file, std::string 
     return 0;
 }
 
-bool DatabaseHandler::isDatabaseValid() {
+bool DatabaseHandler::isDatabaseValid()
+{
     char *zErrMsg = NULL;
     int returnInt = true;
 
@@ -297,7 +301,8 @@ bool DatabaseHandler::isDatabaseValid() {
 }
 
 
-bool DatabaseHandler::getIsDatabaseInitialised() {
+bool DatabaseHandler::getIsDatabaseInitialised()
+{
     return isDatabaseInitialised;
 }
 
@@ -308,8 +313,7 @@ bool DatabaseHandler::isMusicExistForUser(std::string title, std::string artist,
     sqlite3_stmt *stmt = NULL;
     sqlite3_prepare_v2(db, "SELECT * FROM musics WHERE title = ?, genre = ?, track_number = ?", -1, &stmt, NULL);
 
-    if(rc != SQLITE_OK)
-    {
+    if(rc != SQLITE_OK) {
         printf("prepare failed: %s", sqlite3_errmsg(db));
         returnInt = false;
     } else {
@@ -330,11 +334,13 @@ bool DatabaseHandler::isMusicExistForUser(std::string title, std::string artist,
 }
 
 
-sqlite3 *DatabaseHandler::getDB() {
+sqlite3 *DatabaseHandler::getDB()
+{
     return db;
 }
 
-int DatabaseHandler::getUserID(std::string username) {
+int DatabaseHandler::getUserID(std::string username)
+{
     int rc, username_id;
 
     sqlite3_stmt *stmt = NULL;
@@ -351,7 +357,7 @@ int DatabaseHandler::getUserID(std::string username) {
 
         if(rc == SQLITE_ROW) {
             username_id = sqlite3_column_int(stmt, 0);
-        } else{
+        } else {
             printf("Error: %s\n", sqlite3_errmsg(db));
             return -1;
         }
@@ -360,10 +366,12 @@ int DatabaseHandler::getUserID(std::string username) {
     return username_id;
 }
 
-char* DatabaseHandler::serialize(std::vector<std::string> &v, unsigned int *count) {
+char* DatabaseHandler::serialize(std::vector<std::string> &v, unsigned int *count)
+{
     unsigned int total_count = 0;
 
-    for(int i = 0; i < v.size(); i++ ) {
+    for(int i = 0; i < v.size(); i++ )
+    {
         // cout << v[i]<< endl;
         total_count += v[i].length() + 1;
     }
@@ -372,9 +380,11 @@ char* DatabaseHandler::serialize(std::vector<std::string> &v, unsigned int *coun
 
     int idx = 0;
 
-    for(int i = 0; i < v.size(); i++ ) {
+    for(int i = 0; i < v.size(); i++ )
+    {
         std::string s = v[i];
-        for (int j = 0; j < s.size(); j ++ ) {
+        for (int j = 0; j < s.size(); j ++ )
+        {
             buffer[idx ++] = s[j];
         }
         buffer[idx ++] = 0;
@@ -385,18 +395,22 @@ char* DatabaseHandler::serialize(std::vector<std::string> &v, unsigned int *coun
     return buffer;
 }
 
-void DatabaseHandler::deserialize(std::vector<std::string> &restore,  const char* buffer, int total_count) {
-    for(int i = 0; i < total_count; i ++ ) {
+void DatabaseHandler::deserialize(std::vector<std::string> &restore,  const char* buffer, int total_count)
+{
+    for(int i = 0; i < total_count; i ++ )
+    {
         const char *begin = &buffer[i];
         int size = 0;
-        while(buffer[i++]) {
+        while(buffer[i++])
+        {
             size += 1;
         }
         restore.push_back(std::string(begin, size));
     }
 }
 
-bool DatabaseHandler::createUser(std::string username, std::string password, std::string *errMsg) {
+bool DatabaseHandler::createUser(std::string username, std::string password, std::string *errMsg)
+{
 
     int rc;
     int returnInt = true;
@@ -431,7 +445,8 @@ bool DatabaseHandler::createUser(std::string username, std::string password, std
     return returnInt;
 }
 
-bool DatabaseHandler::getUserInfos(std::string username, int *id, std::vector<std::string> *directories, std::string *errMsg) {
+bool DatabaseHandler::getUserInfos(std::string username, int *id, std::vector<std::string> *directories, std::string *errMsg)
+{
 
     int rc;
     int returnInt = true;
@@ -463,8 +478,4 @@ bool DatabaseHandler::getUserInfos(std::string username, int *id, std::vector<st
     }
 
     return returnInt;
-}
-
-bool DatabaseHandler::updateUserPaths(std::vector<std::string> musicPath, std::string errMsg) {
-    return true;
 }
