@@ -239,8 +239,9 @@ void WebHandler::handlerLoop() {
     
     while(1)
     {
+        printf("Wait for client...\n");
         tcpServer->connectAClient();
-        //printf("Client connected\n");
+        printf("Client connected\n");
 
         std::vector<std::string> requestHeader = getRequestHeader();
         if(lastRequestHasTimedOut == false) {

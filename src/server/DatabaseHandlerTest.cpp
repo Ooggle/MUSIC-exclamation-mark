@@ -41,18 +41,22 @@ int main() {
         dbHandler->addMusicsforUser("tests/musics/", "Ooggle");
     }
 
-    /* std::vector<std::string> v;
-    v.push_back("aaa");
-    v.push_back("bbb");
-
-    dbHandler->createUser("Ooggle2", "pass", v); */
-
-
-    sqlite3 *db;
+    /* sqlite3 *db;
     db = dbHandler->getDB();
 
     WebHandler handler("localhost", 81, db);
-    handler.handlerLoop();
+    handler.handlerLoop(); */
+
+
+
+
+
+
+
+
+
+
+    // OLD THINGS
 
     /* char select[] = "SELECT * FROM COMPANY";
     sqlite3_stmt *stmt;

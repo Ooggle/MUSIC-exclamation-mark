@@ -30,6 +30,7 @@ class DatabaseHandler {
         int createTables();
         // Init the server databases.
         int addMusicsforUser(std::string path, std::string username);
+        int addMusicforUser(std::vector<std::string> file, std::string username);
         bool isDatabaseValid();
 
         bool getIsDatabaseInitialised();
