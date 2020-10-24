@@ -34,6 +34,7 @@ class DatabaseHandler {
         bool isDatabaseValid();
 
         bool getIsDatabaseInitialised();
+        int getUserID(std::string username);
         sqlite3 *getDB();
 
         char* serialize(std::vector<std::string> &v, unsigned int *count);

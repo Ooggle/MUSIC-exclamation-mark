@@ -176,26 +176,11 @@ int DatabaseHandler::addMusicsforUser(std::string path, std::string username) {
     } */
 
     // Verify username
-    int rc, username_id;
-
-    sqlite3_stmt *stmt = NULL;
-    rc = sqlite3_prepare_v2(db, "SELECT * FROM users WHERE username = ?", -1, &stmt, NULL);
-
-    if(rc != SQLITE_OK) {
-        printf("prepare failed: %s\n", sqlite3_errmsg(db));
-        return false;
-    } else {
-
-        sqlite3_bind_text(stmt, 1, username.c_str(), username.length(), NULL);
-        
-        rc = sqlite3_step(stmt);
-
-        if(rc == SQLITE_ROW) {
-            username_id = sqlite3_column_int(stmt, 0);
-        } else{
-            printf("Cannot add music(s): %s\n", sqlite3_errmsg(db));
-            return -1;
-        }
+    int username_id = getUserID(username);
+    if(username_id == -1)
+    {
+        printf("Cannot add music(s), user not found\n");
+        return -1;
     }
 
     for(int i = 0; i < filenames.size(); i++){
@@ -210,27 +195,16 @@ int DatabaseHandler::addMusicsforUser(std::string path, std::string username) {
 int DatabaseHandler::addMusicforUser(std::vector<std::string> file, std::string username) {
 
     // Verify username
-    int rc, username_id;
-
-    sqlite3_stmt *stmt = NULL;
-    rc = sqlite3_prepare_v2(db, "SELECT * FROM users WHERE username = ?", -1, &stmt, NULL);
-
-    if(rc != SQLITE_OK) {
-        printf("prepare failed: %s\n", sqlite3_errmsg(db));
-        return false;
-    } else {
-
-        sqlite3_bind_text(stmt, 1, username.c_str(), username.length(), NULL);
-        
-        rc = sqlite3_step(stmt);
-
-        if(rc == SQLITE_ROW) {
-            username_id = sqlite3_column_int(stmt, 0);
-        } else{
-            printf("Cannot add music(s): %s\n", sqlite3_errmsg(db));
-            return -1;
-        }
+    int username_id = getUserID(username);
+    if(username_id == -1)
+    {
+        printf("Cannot add music, user not found\n");
+        return -1;
     }
+    
+
+    int rc;
+    sqlite3_stmt *stmt = NULL;
 
     TagLib::String fTitle;
     TagLib::String fArtist;
@@ -329,6 +303,32 @@ bool DatabaseHandler::getIsDatabaseInitialised() {
 
 sqlite3 *DatabaseHandler::getDB() {
     return db;
+}
+
+int DatabaseHandler::getUserID(std::string username) {
+    int rc, username_id;
+
+    sqlite3_stmt *stmt = NULL;
+    rc = sqlite3_prepare_v2(db, "SELECT * FROM users WHERE username = ?", -1, &stmt, NULL);
+
+    if(rc != SQLITE_OK) {
+        printf("prepare failed: %s\n", sqlite3_errmsg(db));
+        return false;
+    } else {
+
+        sqlite3_bind_text(stmt, 1, username.c_str(), username.length(), NULL);
+        
+        rc = sqlite3_step(stmt);
+
+        if(rc == SQLITE_ROW) {
+            username_id = sqlite3_column_int(stmt, 0);
+        } else{
+            printf("Error: %s\n", sqlite3_errmsg(db));
+            return -1;
+        }
+    }
+
+    return username_id;
 }
 
 char* DatabaseHandler::serialize(std::vector<std::string> &v, unsigned int *count) {
