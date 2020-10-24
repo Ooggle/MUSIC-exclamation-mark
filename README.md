@@ -18,3 +18,10 @@ Web player: 0%
 For now, it will support mp3, flac and ogg formats. Maybe i will add more in the future. Also, everything is WIP for the moment.
 
 To view the server API progress, feel free to visit [the dedicated page](diagrams/server/api_doc.md).
+
+## Build
+
+Dependencies :
+```bash
+sudo apt install build-essential libtag1-dev libsqlite3-dev libz-dev
+```

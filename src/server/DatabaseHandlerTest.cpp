@@ -1,4 +1,4 @@
-/* compile : g++ -std=c++17 DatabaseHandlerTest.cpp DatabaseHandler.cpp WebHandler.cpp TcpServer.cpp -o DatabaseHandlerTest -lsqlite3 -lpthread -ldl `taglib-config --libs` `pkg-config --cflags --libs taglib` -lz -Bstatic -static-libstdc++ */
+/* compile : g++ -std=c++17 DatabaseHandlerTest.cpp DatabaseHandler.cpp WebHandler.cpp TcpServer.cpp -o DatabaseHandlerTest -lsqlite3 -lpthread -ldl `taglib-config --libs` `pkg-config --cflags --libs taglib` -lz -lstdc++fs -Bstatic -static-libstdc++ */
 
 // c++ includes
 #include <string>

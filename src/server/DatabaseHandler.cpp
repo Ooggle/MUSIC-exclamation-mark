@@ -190,7 +190,7 @@ int DatabaseHandler::addMusicsforUser(std::string path, std::string username) {
         
         rc = sqlite3_step(stmt);
 
-        if(rc == SQLITE_ROW) {
+        if(rc == SQLITE_DONE) {
             username_id = sqlite3_column_int(stmt, 0);
         } else{
             printf("Cannot add music(s): %s\n", sqlite3_errmsg(db));
@@ -249,7 +249,7 @@ int DatabaseHandler::addMusicsforUser(std::string path, std::string username) {
             int rc2;
 
             sqlite3_stmt *stmt2 = NULL;
-            rc2 = sqlite3_prepare_v2(db, "SELECT * FROM albums WHERE username = ?", -1, &stmt2, NULL);
+            rc2 = sqlite3_prepare_v2(db, "SELECT * FROM users WHERE id = ?", -1, &stmt2, NULL);
 
             if(rc2 != SQLITE_OK) {
                 printf("prepare failed: %s\n", sqlite3_errmsg(db));
@@ -273,7 +273,7 @@ int DatabaseHandler::addMusicsforUser(std::string path, std::string username) {
             sqlite3_bind_text(stmt, 1, filenames[i].at(0).c_str(), filenames[i].at(0).length(), NULL); //path
             sqlite3_bind_text(stmt, 2, filenames[i].at(1).c_str(), filenames[i].at(1).length(), NULL); //filename
             sqlite3_bind_text(stmt, 3, filenames[i].at(2).c_str(), filenames[i].at(2).length(), NULL); //extension
-            sqlite3_bind_int(stmt, 4, username_id); //user_id TODO
+            sqlite3_bind_int(stmt, 4, username_id); //user_id
             sqlite3_bind_int(stmt, 5, 1); //album ID TODO
             sqlite3_bind_text(stmt, 6, genre, genreLength, NULL); //genre
             sqlite3_bind_int(stmt, 7, fTrack);
