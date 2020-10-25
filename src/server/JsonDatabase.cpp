@@ -3,12 +3,12 @@
 using json = nlohmann::json;
 namespace fs = std::filesystem;
 
-JsonDatabase::Database(std::string databaseName)
+JsonDatabase::JsonDatabase(std::string databaseName)
 {
 
 }
 
-JsonDatabase::~Database()
+JsonDatabase::~JsonDatabase()
 {
 
 }

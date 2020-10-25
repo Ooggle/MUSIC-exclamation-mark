@@ -52,6 +52,7 @@ class WebHandler {
         void sendMusicFile();
         void sendMusicsDB();
         void sendAlbumsDB();
+        void sendArtistsDB();
         void sendHTTPOptions();
 
         void createUser();

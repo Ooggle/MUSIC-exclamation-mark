@@ -3,16 +3,15 @@
     Some flags are useless for now.
 */
 
-#include "JsonDatabase.h"
-#include "DBConfig.h"
-#include "DBMusic.h"
+#include "DatabaseHandler.h"
+#include "WebHandler.h"
 #include <stdio.h>
 
-#define SERVER_VERSION 0.1
+#define SERVER_VERSION "0.1"
 
 int main()
 {
-    printf("Welcome to MUSIC! server %2.1F.\n", SERVER_VERSION);
+    printf("Welcome to MUSIC! server %s.\n", SERVER_VERSION);
 
     return EXIT_SUCCESS;
 }

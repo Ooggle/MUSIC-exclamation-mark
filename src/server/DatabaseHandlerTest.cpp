@@ -42,11 +42,11 @@ int main()
         dbHandler->addMusicsforUser("tests/musics/", "Ooggle");
     }
 
-    /* sqlite3 *db;
+    sqlite3 *db;
     db = dbHandler->getDB();
 
     WebHandler handler("localhost", 81, db);
-    handler.handlerLoop(); */
+    handler.handlerLoop();
 
 
 

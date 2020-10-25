@@ -82,7 +82,7 @@ int WebHandler::parseRequest(std::vector<std::string> vectorSource) {
     regex_t reg;
 
     // Function call to create regex
-    if (regcomp(&reg, "^(GET|OPTIONS)\\s\\/(music|music-db|create-user|get-user-infos)(\\?.*)\\sHTTP", REG_EXTENDED) != 0) {
+    if (regcomp(&reg, "^(GET|OPTIONS)\\s\\/(music|music-db|album-db|artist-db|create-user|get-user-infos)(\\?.*)\\sHTTP", REG_EXTENDED) != 0) {
         printf("Compilation error.\n");
     }
     
@@ -264,6 +264,18 @@ void WebHandler::handlerLoop()
                     } else if(lastRequestEndpoint.compare("music-db") == 0) {
                         printf(" -------------- music-db request -------------\n");
                         sendMusicsDB();
+                        printf("Disconnecting client...\n");
+                        tcpServer->disconnectAClient();
+                        printf("Client disconnected\n");
+                    } else if(lastRequestEndpoint.compare("album-db") == 0) {
+                        printf(" -------------- album-db request -------------\n");
+                        sendAlbumsDB();
+                        printf("Disconnecting client...\n");
+                        tcpServer->disconnectAClient();
+                        printf("Client disconnected\n");
+                    } else if(lastRequestEndpoint.compare("artist-db") == 0) {
+                        printf(" -------------- artist-db request -------------\n");
+                        sendArtistsDB();
                         printf("Disconnecting client...\n");
                         tcpServer->disconnectAClient();
                         printf("Client disconnected\n");
@@ -575,7 +587,78 @@ void WebHandler::sendMusicsDB() {
 
 void WebHandler::sendAlbumsDB()
 {
-    
+    char select[] = "SELECT albums.id, albums.name AS album_name, albums.album_year, artists.name AS artist_name, albums.artist_id \
+                    FROM albums \
+                    LEFT JOIN artists ON artists.id = albums.artist_id";
+    sqlite3_stmt *stmt;
+    if(sqlite3_prepare_v2(db, select, -1, &stmt, NULL) != SQLITE_OK) {
+        printf("ERROR: while compiling sql: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        sqlite3_finalize(stmt);
+
+        printf("Error in SQL Prepare, aborting...\n");
+        sendForbiddenResponse();
+        return;
+    }
+
+    nlohmann::json json;
+
+
+    // execute sql statement to create json
+    int ret_code = 0;
+    int rownum = 0;
+    while((ret_code = sqlite3_step(stmt)) == SQLITE_ROW)
+    {
+
+        json["albums"][rownum]["id"] = sqlite3_column_int(stmt, 0);
+        json["albums"][rownum]["name"] = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+        json["albums"][rownum]["year"] = sqlite3_column_int(stmt, 2);
+        json["albums"][rownum]["artist_name"] = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3));
+        json["albums"][rownum]["artist_id"] = sqlite3_column_int(stmt, 4);
+        json["albums"][rownum]["img"] = ""; // TODO
+
+        rownum += 1;
+    }
+
+    sqlite3_finalize(stmt);
+
+    sendJson(json);
+}
+
+void WebHandler::sendArtistsDB()
+{
+    char select[] = "SELECT artists.id, artists.name \
+                    FROM artists";
+    sqlite3_stmt *stmt;
+    if(sqlite3_prepare_v2(db, select, -1, &stmt, NULL) != SQLITE_OK) {
+        printf("ERROR: while compiling sql: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        sqlite3_finalize(stmt);
+
+        printf("Error in SQL Prepare, aborting...\n");
+        sendForbiddenResponse();
+        return;
+    }
+
+    nlohmann::json json;
+
+
+    // execute sql statement to create json
+    int ret_code = 0;
+    int rownum = 0;
+    while((ret_code = sqlite3_step(stmt)) == SQLITE_ROW)
+    {
+
+        json["artists"][rownum]["id"] = sqlite3_column_int(stmt, 0);
+        json["artists"][rownum]["name"] = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+        json["artists"][rownum]["img"] = ""; // TODO
+
+        rownum += 1;
+    }
+
+    sqlite3_finalize(stmt);
+
+    sendJson(json);
 }
 
 void WebHandler::sendHTTPOptions()
