@@ -576,6 +576,8 @@ void WebHandler::sendMusicsDB() {
         json["musics"][rownum]["artist"] = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 10));
         json["musics"][rownum]["year"] = sqlite3_column_int(stmt, 11);
 
+        json["result_code"] = 0;
+
         rownum += 1;
     }
 
@@ -617,6 +619,8 @@ void WebHandler::sendAlbumsDB()
         json["albums"][rownum]["artist_id"] = sqlite3_column_int(stmt, 4);
         json["albums"][rownum]["img"] = ""; // TODO
 
+        json["result_code"] = 0;
+
         rownum += 1;
     }
 
@@ -652,6 +656,8 @@ void WebHandler::sendArtistsDB()
         json["artists"][rownum]["id"] = sqlite3_column_int(stmt, 0);
         json["artists"][rownum]["name"] = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
         json["artists"][rownum]["img"] = ""; // TODO
+
+        json["result_code"] = 0;
 
         rownum += 1;
     }
