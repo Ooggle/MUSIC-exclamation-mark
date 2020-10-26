@@ -244,9 +244,9 @@ void WebHandler::handlerLoop()
     
     while(1)
     {
-        printf("Wait for client...\n");
+        //printf("Wait for client...\n");
         tcpServer->connectAClient();
-        printf("Client connected\n");
+        //printf("Client connected\n");
 
         std::vector<std::string> requestHeader = getRequestHeader();
         if(lastRequestHasTimedOut == false) {
@@ -377,13 +377,19 @@ void WebHandler::sendForbiddenResponse()
 {
     // header sending
     //printf("sending data...");
-    std::string header;
+    /* std::string header;
     // audio/ogg pour ogg et flac, audio/mpeg pour mp3
     header = "HTTP/1.1 403 Forbidden\r\n";
     header += "\r\n";
 
     //printf("%s\n", "403 Forbidden");
-    tcpServer->sendData((void *)header.c_str(), header.length());
+    tcpServer->sendData((void *)header.c_str(), header.length()); */
+
+    nlohmann::json json;
+
+    json["code"] = 514;
+    json["message"] = "Bad request.";
+    sendJson(json);
 }
 
 void WebHandler::sendMusicFile()
@@ -545,6 +551,8 @@ void WebHandler::sendMusicFile()
 void WebHandler::sendMusicsDB() {
     /* printf("\n\n"); */
 
+    nlohmann::json json;
+
     char select[] = "SELECT * FROM musics";
     sqlite3_stmt *stmt;
     if(sqlite3_prepare_v2(db, select, -1, &stmt, NULL) != SQLITE_OK) {
@@ -553,11 +561,12 @@ void WebHandler::sendMusicsDB() {
         sqlite3_finalize(stmt);
 
         printf("Error in SQL Prepare, aborting...\n");
-        sendForbiddenResponse();
+
+        json["code"] = 2;
+        sendJson(json);
+
         return;
     }
-
-    nlohmann::json json;
 
 
     // execute sql statement to create json
@@ -576,7 +585,7 @@ void WebHandler::sendMusicsDB() {
         json["musics"][rownum]["artist"] = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 10));
         json["musics"][rownum]["year"] = sqlite3_column_int(stmt, 11);
 
-        json["result_code"] = 0;
+        json["code"] = 0;
 
         rownum += 1;
     }
@@ -589,6 +598,8 @@ void WebHandler::sendMusicsDB() {
 
 void WebHandler::sendAlbumsDB()
 {
+    nlohmann::json json;
+
     char select[] = "SELECT albums.id, albums.name AS album_name, albums.album_year, artists.name AS artist_name, albums.artist_id \
                     FROM albums \
                     LEFT JOIN artists ON artists.id = albums.artist_id";
@@ -599,12 +610,12 @@ void WebHandler::sendAlbumsDB()
         sqlite3_finalize(stmt);
 
         printf("Error in SQL Prepare, aborting...\n");
-        sendForbiddenResponse();
+        
+        json["code"] = 2;
+        sendJson(json);
+
         return;
     }
-
-    nlohmann::json json;
-
 
     // execute sql statement to create json
     int ret_code = 0;
@@ -619,7 +630,7 @@ void WebHandler::sendAlbumsDB()
         json["albums"][rownum]["artist_id"] = sqlite3_column_int(stmt, 4);
         json["albums"][rownum]["img"] = ""; // TODO
 
-        json["result_code"] = 0;
+        json["code"] = 0;
 
         rownum += 1;
     }
@@ -631,6 +642,8 @@ void WebHandler::sendAlbumsDB()
 
 void WebHandler::sendArtistsDB()
 {
+    nlohmann::json json;
+
     char select[] = "SELECT artists.id, artists.name \
                     FROM artists";
     sqlite3_stmt *stmt;
@@ -640,12 +653,12 @@ void WebHandler::sendArtistsDB()
         sqlite3_finalize(stmt);
 
         printf("Error in SQL Prepare, aborting...\n");
-        sendForbiddenResponse();
+        
+        json["code"] = 3;
+        sendJson(json);
+
         return;
     }
-
-    nlohmann::json json;
-
 
     // execute sql statement to create json
     int ret_code = 0;
@@ -657,7 +670,7 @@ void WebHandler::sendArtistsDB()
         json["artists"][rownum]["name"] = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
         json["artists"][rownum]["img"] = ""; // TODO
 
-        json["result_code"] = 0;
+        json["code"] = 0;
 
         rownum += 1;
     }
@@ -701,7 +714,7 @@ void WebHandler::createUser()
 
     if(user.compare("") == 0) {
         nlohmann::json json;
-        json["result_code"] = 2;
+        json["code"] = 2;
         json["message"] = "Error, no username provided.";
 
         sendJson(json);
@@ -719,7 +732,7 @@ void WebHandler::createUser()
 
     if(password.compare("") == 0) {
         nlohmann::json json;
-        json["result_code"] = 3;
+        json["code"] = 3;
         json["message"] = "Error, no password provided.";
 
         sendJson(json);
@@ -731,7 +744,7 @@ void WebHandler::createUser()
     if(dbHandler->createUser(user, password, &errMsg)) {
 
         nlohmann::json json;
-        json["result_code"] = 0;
+        json["code"] = 0;
         json["message"] = "User created successfully.";
 
         sendJson(json);
@@ -741,7 +754,7 @@ void WebHandler::createUser()
     } else {
 
         nlohmann::json json;
-        json["result_code"] = -1;
+        json["code"] = -1;
         json["message"] = errMsg.c_str();
 
         sendJson(json);
@@ -767,7 +780,7 @@ void WebHandler::getUserInfos()
 
     if(user.compare("") == 0) {
         nlohmann::json json;
-        json["result_code"] = 2;
+        json["code"] = 2;
         json["message"] = "Error, no username provided.";
 
         sendJson(json);
@@ -783,7 +796,7 @@ void WebHandler::getUserInfos()
         sqlite3_finalize(stmt);
 
         nlohmann::json json;
-        json["result_code"] = 3;
+        json["code"] = 3;
         json["message"] = "Request error.";
 
         sendJson(json);
@@ -802,7 +815,7 @@ void WebHandler::getUserInfos()
     if(ret_code == SQLITE_ROW) {
 
         nlohmann::json json;
-        json["result_code"] = 0;
+        json["code"] = 0;
 
         json["informations"]["id"] = sqlite3_column_int(stmt, 0);
 
@@ -828,7 +841,7 @@ void WebHandler::getUserInfos()
     } else {
 
         nlohmann::json json;
-        json["result_code"] = 4;
+        json["code"] = 4;
         json["message"] = "Username not found.";
 
         sendJson(json);

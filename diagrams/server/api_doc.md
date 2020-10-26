@@ -26,7 +26,7 @@ response: a json file
 
 ```json
 {
-    "result_code": "integer",
+    "code": "integer",
     "musics": [
         {
             "album_id": "integer",
@@ -62,7 +62,7 @@ response: a json file
 
 ```json
 {
-    "result_code": "integer",
+    "code": "integer",
     "albums": [
         {
             "artist_id": "integer",
@@ -97,7 +97,7 @@ response: a json file
 
 ```json
 {
-    "result_code": "integer",
+    "code": "integer",
     "artists": [
         {
             "id": "integer",
@@ -129,11 +129,11 @@ response: a json file
 ```json
 {
     "message": "string",
-    "result_code": "integer"
+    "code": "integer"
 }
 ```
 ```
-"result_code": 0 = success
+"code": 0 = success
 ```
 
 <br>
@@ -151,7 +151,7 @@ response: a json file
 
 ```json
 {
-    "result_code": "integer",
+    "code": "integer",
     "informations": [
         {
         "id": "integer",
@@ -167,7 +167,7 @@ response: a json file
 }
 ```
 ```
-"result_code": 0 = success
+"code": 0 = success
 "directories" node can be empty or not present
 ```
 

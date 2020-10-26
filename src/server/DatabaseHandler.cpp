@@ -393,9 +393,9 @@ int DatabaseHandler::isMusicExistForUser(std::string username, std::string genre
 
         if(rc == SQLITE_ROW) {
             returnInt = sqlite3_column_int(stmt, 0);;
-            printf("Music found\n");
+            //printf("Music found\n");
         } else {
-            printf("Music not found\n");
+            //printf("Music not found\n");
         }
     }
 
@@ -427,9 +427,9 @@ int DatabaseHandler::isArtistExistForUser(std::string username, std::string arti
 
         if(rc == SQLITE_ROW) {
             returnInt = sqlite3_column_int(stmt, 0);;
-            printf("Artist found\n");
+            //printf("Artist found\n");
         } else {
-            printf("Artist not found\n");
+            //printf("Artist not found\n");
         }
     }
 
@@ -463,9 +463,9 @@ int DatabaseHandler::isAlbumExistForUser(std::string username, std::string album
 
         if(rc == SQLITE_ROW) {
             returnInt = sqlite3_column_int(stmt, 0);
-            printf("Album found\n");
+            //printf("Album found\n");
         } else {
-            printf("Album not found\n");
+            //printf("Album not found\n");
         }
     }
 
