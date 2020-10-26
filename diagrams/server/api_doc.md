@@ -155,11 +155,6 @@ response: a json file
     "informations": [
         {
         "id": "integer",
-        "directories": [
-            "string",
-            "string",
-            {"..."}
-        ],
         "library_revision": "integer",
         "creation_date": "string"
         }
@@ -168,7 +163,6 @@ response: a json file
 ```
 ```
 "code": 0 = success
-"directories" node can be empty or not present
 ```
 
 <br>

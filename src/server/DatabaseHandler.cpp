@@ -104,8 +104,6 @@ int DatabaseHandler::createTables()
             id              INTEGER PRIMARY KEY,\
             username        VARCHAR(250) NOT NULL UNIQUE,\
             password_crypt  VARCHAR(500) NOT NULL,\
-            musics_paths    TEXT(10000),\
-            paths_size      INTEGER,\
             library_revision    INTEGER,\
             creation_date   DATETIME\
         )";
@@ -504,49 +502,6 @@ int DatabaseHandler::getUserID(std::string username)
     return username_id;
 }
 
-char* DatabaseHandler::serialize(std::vector<std::string> &v, unsigned int *count)
-{
-    unsigned int total_count = 0;
-
-    for(int i = 0; i < v.size(); i++ )
-    {
-        // cout << v[i]<< endl;
-        total_count += v[i].length() + 1;
-    }
-
-    char *buffer = new char[total_count];
-
-    int idx = 0;
-
-    for(int i = 0; i < v.size(); i++ )
-    {
-        std::string s = v[i];
-        for (int j = 0; j < s.size(); j ++ )
-        {
-            buffer[idx ++] = s[j];
-        }
-        buffer[idx ++] = 0;
-    }
-
-    *count  = total_count;
-
-    return buffer;
-}
-
-void DatabaseHandler::deserialize(std::vector<std::string> &restore,  const char* buffer, int total_count)
-{
-    for(int i = 0; i < total_count; i ++ )
-    {
-        const char *begin = &buffer[i];
-        int size = 0;
-        while(buffer[i++])
-        {
-            size += 1;
-        }
-        restore.push_back(std::string(begin, size));
-    }
-}
-
 bool DatabaseHandler::createUser(std::string username, std::string password, std::string *errMsg)
 {
 
@@ -554,7 +509,7 @@ bool DatabaseHandler::createUser(std::string username, std::string password, std
     int returnInt = true;
 
     sqlite3_stmt *stmt = NULL;
-    rc = sqlite3_prepare_v2(db, "INSERT INTO users(username, password_crypt, musics_paths, paths_size, library_revision, creation_date) VALUES(?, ?, '', 0, ?, DATETIME('now','localtime'))", -1, &stmt, NULL);
+    rc = sqlite3_prepare_v2(db, "INSERT INTO users(username, password_crypt, library_revision, creation_date) VALUES(?, ?, ?, DATETIME('now','localtime'))", -1, &stmt, NULL);
 
     if(rc != SQLITE_OK) {
         printf("prepare failed: %s\n", sqlite3_errmsg(db));

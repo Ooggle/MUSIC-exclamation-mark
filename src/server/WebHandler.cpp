@@ -819,23 +819,8 @@ void WebHandler::getUserInfos()
 
         json["informations"]["id"] = sqlite3_column_int(stmt, 0);
 
-        int pathsSize = sqlite3_column_int(stmt, 4);
-
-        const char* paths = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3));
-
-        std::vector<std::string> pathVector;
-        dbHandler->deserialize(pathVector, paths, pathsSize);
-        printf("%s\n", paths);
-        printf("path size: %d\n", pathVector.size());
-
-        for(int i = 0; i < pathVector.size(); i++)
-        {
-            json["informations"]["directories"][i] = pathVector[i].c_str();
-            printf("%d: %s\n", i, pathVector[i].c_str());
-        }
-
-        json["informations"]["library_revision"] = sqlite3_column_int(stmt, 5);
-        json["informations"]["creation_date"] = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6));
+        json["informations"]["library_revision"] = sqlite3_column_int(stmt, 2);
+        json["informations"]["creation_date"] = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
 
         sendJson(json);
     } else {
