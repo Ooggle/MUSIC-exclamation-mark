@@ -15,6 +15,9 @@
 // taglib
 #include <taglib/tag.h>
 #include <taglib/fileref.h>
+#include <taglib/id3v2tag.h>
+#include <taglib/flacfile.h>
+#include <taglib/attachedpictureframe.h>
 
 class DatabaseHandler {
     private:
