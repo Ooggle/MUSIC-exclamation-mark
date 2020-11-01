@@ -289,7 +289,7 @@ int DatabaseHandler::addMusicforUser(std::vector<std::string> file, std::string 
             sqlite3_bind_int(stmt, 3, artistID); // artist_id
             sqlite3_bind_int(stmt, 4, fYear); // year
 
-            /* TESTS for ID3v2 picture tag adding */
+            /* ID3v2 picture tag adding */
 
             TagLib::FLAC::File myflac(file.at(0).c_str());
 
@@ -303,16 +303,20 @@ int DatabaseHandler::addMusicforUser(std::vector<std::string> file, std::string 
                     // I really don't know why I have to do this here...
                     img_frame_list.front()->size();
 
-                    TagLib::ID3v2::AttachedPictureFrame* apic_img = static_cast<TagLib::ID3v2::AttachedPictureFrame*>(* img_frame_list.begin());
+                    TagLib::ID3v2::AttachedPictureFrame* apic_img = static_cast<TagLib::ID3v2::AttachedPictureFrame*>(*img_frame_list.begin());
                     TagLib::ByteVector bytes = apic_img->picture();
                     sqlite3_bind_blob64(stmt, 5, (const void *)bytes.data(), img_frame_list.front()->render().size(), SQLITE_TRANSIENT);
 
-            } else {
-                /* std::cout << "no id3v2 tag" << std::endl; */
-            }
+            /* That need to be changed because there is literally no check for this part */
+            } else{
 
+                TagLib::List<TagLib::FLAC::Picture *> piclist = myflac.pictureList();
+                TagLib::FLAC::Picture *pic = static_cast<TagLib::FLAC::Picture*>(*piclist.begin());
 
-            /* TEST END */
+                sqlite3_bind_blob64(stmt, 5, (const void *)pic->data().data(), pic->data().size(), SQLITE_TRANSIENT);
+
+            } 
+
 
             rc = sqlite3_step(stmt);
             if (rc != SQLITE_DONE) {

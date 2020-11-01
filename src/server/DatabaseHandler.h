@@ -18,6 +18,7 @@
 #include <taglib/id3v2tag.h>
 #include <taglib/flacfile.h>
 #include <taglib/attachedpictureframe.h>
+#include <taglib/flacpicture.h>
 
 class DatabaseHandler {
     private:
