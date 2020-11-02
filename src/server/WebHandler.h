@@ -47,6 +47,9 @@ class WebHandler {
         void handlerLoop();
 
         void sendJson(nlohmann::json json);
+        void sendAlbumsCover(int album_id);
+        bool getIntFromHeader(std::string paramName, int &paramValue);
+        bool getStringFromHeader(std::string paramName, std::string &paramValue);
 
         void sendForbiddenResponse();
         void sendMusicFile();

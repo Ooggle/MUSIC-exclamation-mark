@@ -372,6 +372,43 @@ void WebHandler::sendJson(nlohmann::json json)
     }
 }
 
+void WebHandler::sendAlbumsCover(int album_id)
+{
+
+}
+
+bool WebHandler::getIntFromHeader(std::string paramName, int &paramValue)
+{
+    bool found = false;
+
+    for(int i = 0; i < lastRequestParams.size(); i++)
+    {
+        if(lastRequestParams[i].first.compare(paramName) == 0) {
+            paramValue = (int) strtol(lastRequestParams[i].second.c_str(), (char **)NULL, 10);
+            found = true;
+            break;
+        }
+    }
+
+    return found;
+}
+
+bool WebHandler::getStringFromHeader(std::string paramName, std::string &paramValue)
+{
+    bool found = false;
+
+    for(int i = 0; i < lastRequestParams.size(); i++)
+    {
+        if(lastRequestParams[i].first.compare(paramName) == 0) {
+            paramValue = lastRequestParams[i].second;
+            found = true;
+            break;
+        }
+    }
+
+    return found;
+}
+
 
 void WebHandler::sendForbiddenResponse()
 {
@@ -403,21 +440,7 @@ void WebHandler::sendMusicFile()
     std::string choosedFile;
     std::string choosedFileExt;
 
-    for(int i = 0; i < lastRequestParams.size(); i++)
-    {
-        if(lastRequestParams[i].first.compare("id") == 0) {
-            choosedID = (int) strtol(lastRequestParams[i].second.c_str(), (char **)NULL, 10);
-            //choosedID = std::stoi(lastRequestParams[i].second);
-            /* printf("param: %s, value: %s\n", lastRequestParams[i].first.c_str(), lastRequestParams[i].second.c_str()); */
-            printf("music id: %d\n", choosedID);
-            break;
-        }
-    }
-    if(choosedID == 0) {
-        printf("Invalid ID, aborting...\n");
-        sendForbiddenResponse();
-        return;
-    } else {
+    if(getIntFromHeader("id", choosedID)) {
         char select[] = "SELECT * FROM musics WHERE id = ?";
         sqlite3_stmt *stmt;
         if(sqlite3_prepare_v2(db, select, -1, &stmt, NULL) != SQLITE_OK) {
@@ -459,6 +482,10 @@ void WebHandler::sendMusicFile()
         }
 
         sqlite3_finalize(stmt);
+    } else {
+        printf("Invalid ID, aborting...\n");
+        sendForbiddenResponse();
+        return;
     }
     
 
@@ -708,16 +735,7 @@ void WebHandler::createUser()
 
     std::string user, password;
 
-    for(int i = 0; i < lastRequestParams.size(); i++)
-    {
-        if(lastRequestParams[i].first.compare("username") == 0) {
-            user = lastRequestParams[i].second;
-            printf("user: %s\n", user.c_str());
-            break;
-        }
-    }
-
-    if(user.compare("") == 0) {
+    if(!getStringFromHeader("username", user)) {
         nlohmann::json json;
         json["code"] = 2;
         json["message"] = "Error, no username provided.";
@@ -727,15 +745,7 @@ void WebHandler::createUser()
         return;
     }
 
-    for(int i = 0; i < lastRequestParams.size(); i++)
-    {
-        if(lastRequestParams[i].first.compare("password") == 0) {
-            password = lastRequestParams[i].second;
-            break;
-        }
-    }
-
-    if(password.compare("") == 0) {
+    if(!getStringFromHeader("password", password)) {
         nlohmann::json json;
         json["code"] = 3;
         json["message"] = "Error, no password provided.";
@@ -774,16 +784,7 @@ void WebHandler::getUserInfos()
 
     std::string user;
 
-    for(int i = 0; i < lastRequestParams.size(); i++)
-    {
-        if(lastRequestParams[i].first.compare("username") == 0) {
-            user = lastRequestParams[i].second;
-            printf("user: %s\n", user.c_str());
-            break;
-        }
-    }
-
-    if(user.compare("") == 0) {
+    if(!getStringFromHeader("username", user)) {
         nlohmann::json json;
         json["code"] = 2;
         json["message"] = "Error, no username provided.";
