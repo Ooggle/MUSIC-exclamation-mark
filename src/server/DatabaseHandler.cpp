@@ -195,6 +195,10 @@ int DatabaseHandler::addMusicsforUser(std::string path, std::string username)
     return 0;
 }
 
+/*
+ * Consider using ffprobe:
+ * ffprobe -v quiet -print_format json -loglevel fatal -show_error -show_format "path/to/file"
+*/
 int DatabaseHandler::addMusicforUser(std::vector<std::string> file, std::string username)
 {
 

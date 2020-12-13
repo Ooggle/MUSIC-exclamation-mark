@@ -1,5 +1,5 @@
 
-#include "TcpServer.h"
+#include "ThreadedTcpServer.h"
 
 #include <sys/types.h>   
 #include <sys/socket.h>
@@ -13,15 +13,15 @@
 #include <arpa/inet.h>
 
 
-TcpServer::TcpServer():socketWaitClient(-1),socketDialogueClient(-1)
+ThreadedTcpServer::ThreadedTcpServer():socketWaitClient(-1)
 {}
 
-TcpServer::~TcpServer()
+ThreadedTcpServer::~ThreadedTcpServer()
 {
 	this->closeServer();
 }
 
-void TcpServer::openServer(std::string address, uint16_t port, int32_t nbPlaces)
+void ThreadedTcpServer::openServer(std::string address, uint16_t port, int32_t nbPlaces)
 {
 	int ctrl;
 	struct sockaddr_in serverAdress;
@@ -54,46 +54,47 @@ void TcpServer::openServer(std::string address, uint16_t port, int32_t nbPlaces)
 	listen(this->socketWaitClient, nbPlaces);
 }
 
-void TcpServer::closeServer()
+void ThreadedTcpServer::closeServer()
 {
-	this->disconnectAClient();
 	shutdown(this->socketWaitClient,SHUT_RDWR);
 	close(this->socketWaitClient);
 	this->socketWaitClient=-1;
 }
 
-ssize_t TcpServer::getData(void* data, uint32_t dataMaxSize)
+ssize_t ThreadedTcpServer::getData(int32_t socket, void* data, uint32_t dataMaxSize)
 {
-	return recv(this->socketDialogueClient, data, dataMaxSize, MSG_DONTWAIT);
+	return recv(socket, data, dataMaxSize, MSG_DONTWAIT);
 }
 
-ssize_t TcpServer::getDataBlocking(void* data, uint32_t dataMaxSize)
+ssize_t ThreadedTcpServer::getDataBlocking(int32_t socket, void* data, uint32_t dataMaxSize)
 {
-	return recv(this->socketDialogueClient, data, dataMaxSize, MSG_WAITALL);
+	return recv(socket, data, dataMaxSize, MSG_WAITALL);
 }
 
-int TcpServer::sendData(void* data, uint32_t nbBytes)
+int ThreadedTcpServer::sendData(int32_t socket, void* data, uint32_t nbBytes)
 {
-	if(send(this->socketDialogueClient, data, nbBytes, MSG_NOSIGNAL) == -1) {
+	if(send(socket, data, nbBytes, MSG_NOSIGNAL) == -1) {
 		return -1;
 	}
 	return 0;
 }
 
-void TcpServer::connectAClient()
+int32_t ThreadedTcpServer::connectAClient()
 {
+	int32_t socketClient = -1;
 	socklen_t tailleAdresseClient;
 	struct sockaddr_in adresseClient;
 	tailleAdresseClient = sizeof(struct sockaddr_in);
 	bzero((char *) &adresseClient, sizeof(struct sockaddr_in));
 	do {
-		this->socketDialogueClient = accept(this->socketWaitClient , (struct sockaddr *) &adresseClient , &tailleAdresseClient);
-	} while(this->socketDialogueClient == -1);
+		socketClient = accept(this->socketWaitClient , (struct sockaddr *) &adresseClient , &tailleAdresseClient);
+	} while(socketClient == -1);
+
+	return socketClient;
 }
 
-void TcpServer::disconnectAClient()
+void ThreadedTcpServer::disconnectAClient(int32_t socket)
 {
-	shutdown(this->socketDialogueClient,SHUT_RDWR);
-	close(this->socketDialogueClient);
-	this->socketDialogueClient=-1;
+	shutdown(socket,SHUT_RDWR);
+	close(socket);
 }
