@@ -1,0 +1,52 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdint.h>
+
+#include "platform.h"
+
+#if defined(WINDOWS)
+// Windows headers
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+// Need to link with Ws2_32.lib
+#pragma comment (lib, "Ws2_32.lib")
+
+#elif defined(POSIX)
+// Linux header
+#include <arpa/inet.h>
+
+#endif
+
+
+
+class SocketCommunication
+{
+    private:
+        int32_t socket;
+
+    public:
+        SocketCommunication(int32_t socketClient) {
+            this->socket = socketClient;
+        }
+
+        ssize_t getData(int32_t socket, void* data, uint32_t dataMaxSize)
+        {
+            return recv(socket, data, dataMaxSize, MSG_DONTWAIT);
+        }
+
+        ssize_t getDataBlocking(int32_t socket, void* data, uint32_t dataMaxSize)
+        {
+            return recv(socket, data, dataMaxSize, MSG_WAITALL);
+        }
+
+        int sendData(int32_t socket, void* data, uint32_t nbBytes)
+        {
+            if(send(socket, data, nbBytes, MSG_NOSIGNAL) == -1) {
+                return -1;
+            }
+            return 0;
+        }
+
+};
