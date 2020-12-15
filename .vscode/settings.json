@@ -55,6 +55,7 @@
         "valarray": "cpp",
         "filesystem": "cpp",
         "condition_variable": "cpp",
-        "mutex": "cpp"
+        "mutex": "cpp",
+        "iomanip": "cpp"
     }
 }

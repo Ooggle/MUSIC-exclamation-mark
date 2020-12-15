@@ -10,7 +10,37 @@ ThreadedTcpServer::~ThreadedTcpServer()
 
 void ThreadedTcpServer::openServer(std::string address, uint16_t port, int32_t nbPlaces)
 {
-	int ctrl;
+	#if defined(WINDOWS)
+	WSADATA wsaData;
+
+	struct addrinfo *result = NULL;
+    struct addrinfo hints;
+	const char * portNew = std::to_string(port).c_str();
+
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_protocol = IPPROTO_TCP;
+    //hints.ai_flags = AI_PASSIVE;
+
+	// Initialize Winsock
+    WSAStartup(MAKEWORD(2,2), &wsaData);
+
+	// Resolve the server address and port
+	getaddrinfo(NULL, portNew, &hints, &result);
+
+	// Create a SOCKET for connecting to server
+    this->socketWaitClient = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+	
+	// Setup the TCP listening socket
+	bind(this->socketWaitClient, result->ai_addr, (int)result->ai_addrlen);
+	freeaddrinfo(result);
+
+	// Setup non-blocking socket
+	u_long iMode=1;
+	ioctlsocket(this->socketWaitClient,FIONBIO,&iMode);
+	
+	#elif defined(POSIX)
 	struct sockaddr_in serverAdress;
 
 	// Create network interface
@@ -40,6 +70,7 @@ void ThreadedTcpServer::openServer(std::string address, uint16_t port, int32_t n
 	tv.tv_usec = 0;
 	setsockopt(this->socketWaitClient, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv); */
 
+	#endif
 
 	// Waiting for one client
 	listen(this->socketWaitClient, nbPlaces);
@@ -49,10 +80,12 @@ void ThreadedTcpServer::closeServer()
 {
 	#if defined(WINDOWS)
 	shutdown(this->socketWaitClient, SD_BOTH);
+	closesocket(this->socketWaitClient);
+	WSACleanup();
 	#elif defined(POSIX)
 	shutdown(this->socketWaitClient, SHUT_RDWR);
-	#endif
 	close(this->socketWaitClient);
+	#endif
 	this->socketWaitClient=-1;
 }
 

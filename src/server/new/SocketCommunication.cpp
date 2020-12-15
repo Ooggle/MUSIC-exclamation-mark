@@ -33,17 +33,33 @@ class SocketCommunication
 
         ssize_t getData(int32_t socket, void* data, uint32_t dataMaxSize)
         {
+            #if defined(WINDOWS)
+            return recv(socket, (char *) data, dataMaxSize, 0);
+            #elif defined(POSIX)
             return recv(socket, data, dataMaxSize, MSG_DONTWAIT);
+            #endif
         }
 
         ssize_t getDataBlocking(int32_t socket, void* data, uint32_t dataMaxSize)
         {
+            #if defined(WINDOWS)
+            return recv(socket, (char *) data, dataMaxSize, MSG_WAITALL);
+            #elif defined(POSIX)
             return recv(socket, data, dataMaxSize, MSG_WAITALL);
+            #endif
         }
 
         int sendData(int32_t socket, void* data, uint32_t nbBytes)
         {
-            if(send(socket, data, nbBytes, MSG_NOSIGNAL) == -1) {
+            int returnCode = 0;
+
+            #if defined(WINDOWS)
+            returnCode = send(socket, (const char *) data, nbBytes, 0);
+            #elif defined(POSIX)
+            returnCode = send(socket, data, nbBytes, MSG_NOSIGNAL);
+            #endif
+
+            if(returnCode == -1) {
                 return -1;
             }
             return 0;
