@@ -14,13 +14,19 @@
         {
             "name": "Windows",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/**",
+                "/usr/lib/gcc/x86_64-w64-mingw32/8.3-win32/include/c++",
+                "/usr/lib/gcc/x86_64-w64-mingw32/8.3-win32/include/c++/x86_64-w64-mingw32",
+                "/usr/lib/gcc/x86_64-w64-mingw32/8.3-win32/include/c++/backward",
+                "/usr/lib/gcc/x86_64-w64-mingw32/8.3-win32/include",
+                "/usr/lib/gcc/x86_64-w64-mingw32/8.3-win32/include-fixed",
+                "/usr/lib/gcc/x86_64-w64-mingw32/8.3-win32/../../../../x86_64-w64-mingw32/include"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/x86_64-w64-mingw32-g++-win32",
-            "cStandard": "gnu17",
+            "cStandard": "c11",
             "cppStandard": "c++17",
-            "intelliSenseMode": "gcc-x64"
+            "intelliSenseMode": "clang-x64"
         }
     ],
     "version": 4

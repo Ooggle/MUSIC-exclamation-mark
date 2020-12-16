@@ -1,9 +1,16 @@
 #include <iostream>
 #include <string>
-#include <thread>
 #include <unistd.h>
 #include <mutex>
 #include <vector>
+
+#include "platform.h"
+
+#if defined(WINDOWS)
+#include "mingw/mingw.thread.h"
+#elif defined(POSIX)
+#include <thread>
+#endif
 
 #include "ThreadedTcpServer.h"
 
@@ -11,6 +18,7 @@ class ServerHandler
 {
     private:
         ThreadedTcpServer *tcpServer;
+        
         std::vector<std::thread> threads;
 
     public:
@@ -30,9 +38,10 @@ class ServerHandler
             while(1) {
                 printf("Wait for client.\n");
                 int32_t sockClient = tcpServer->connectAClient();
+
                 std::thread t1 = std::thread(&ServerHandler::clientHandler, this, sockClient);
-                
                 t1.detach();
+                
             }
         }
 

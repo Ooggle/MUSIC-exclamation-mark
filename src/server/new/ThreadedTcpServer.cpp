@@ -1,5 +1,12 @@
 #include "ThreadedTcpServer.h"
 
+/* compile using linux mingw:
+ * x86_64-w64-mingw32-g++ -std=c++0x ServerHandler.cpp SocketCommunication.cpp ThreadedTcpServer.cpp -lws2_32 -lpthread -static -o thread
+ * 
+ * on Linux:
+ * g++ ServerHandler.cpp SocketCommunication.cpp ThreadedTcpServer.cpp -o thread -lpthread
+ */
+
 ThreadedTcpServer::ThreadedTcpServer():socketWaitClient(-1)
 {}
 
@@ -33,6 +40,8 @@ void ThreadedTcpServer::openServer(std::string address, uint16_t port, int32_t n
     this->socketWaitClient = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
 	
 	// Setup the TCP listening socket
+	unsigned long _enable = 1;
+	setsockopt(this->socketWaitClient, SOL_SOCKET, SO_REUSEADDR, (const char*)&_enable,sizeof(unsigned long));
 	bind(this->socketWaitClient, result->ai_addr, (int)result->ai_addrlen);
 	freeaddrinfo(result);
 
@@ -107,8 +116,9 @@ void ThreadedTcpServer::disconnectAClient(int32_t socket)
 {
 	#if defined(WINDOWS)
 	shutdown(socket, SD_BOTH);
+	closesocket(socket);
 	#else
 	shutdown(socket, SHUT_RDWR);
-	#endif
 	close(socket);
+	#endif
 }
