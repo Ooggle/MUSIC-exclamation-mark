@@ -16,6 +16,7 @@
 #endif
 
 #include "ThreadedTcpServer.h"
+#include "SocketCommunication.h"
 
 class ServerHandler
 {
@@ -25,38 +26,14 @@ class ServerHandler
         std::vector<std::thread> threads;
 
     public:
-        ServerHandler(std::string address, uint16_t port, int32_t nbPlaces) {
-            tcpServer = new ThreadedTcpServer();
-            tcpServer->openServer(address, port, nbPlaces);
-            printf("Server opened\n");
-        }
+        ServerHandler(std::string address, uint16_t port, int32_t nbPlaces);
 
-        ~ServerHandler() {
-            tcpServer->closeServer();
-            delete tcpServer;
-        }
+        ~ServerHandler();
 
-        void handlerLoop() {
-
-            while(1) {
-                printf("Wait for client.\n");
-                int32_t sockClient = tcpServer->connectAClient();
-
-                std::thread t1 = std::thread(&ServerHandler::clientHandler, this, sockClient);
-                t1.detach();
-                
-            }
-        }
+        void handlerLoop();
 
         // Main client handler
-        void clientHandler(int32_t sockClient) {
-            printf("sock Client: %d\n", sockClient);
-
-
-
-            printf("Disconnecting client.\n");
-            tcpServer->disconnectAClient(sockClient);
-        }
+        void clientHandler(int32_t sockClient);
 
 };
 

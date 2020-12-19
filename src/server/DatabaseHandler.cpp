@@ -27,7 +27,7 @@ std::vector<std::vector<std::string>> DatabaseHandler::getFilesInDirectory(std::
     {
         //std::cout << entry.path() << ", directory: " << entry.is_directory() << std::endl;
         if(entry.is_directory()) {
-            std::vector<std::vector<std::string>> filenamesTemp = getFilesInDirectory(entry.path());
+            std::vector<std::vector<std::string>> filenamesTemp = getFilesInDirectory(entry.path().string());
             filenames.insert(filenames.end(), filenamesTemp.begin(), filenamesTemp.end());
         } else {
             if((entry.path().extension() == ".mp3") ||
@@ -35,11 +35,11 @@ std::vector<std::vector<std::string>> DatabaseHandler::getFilesInDirectory(std::
             (entry.path().extension() == ".flac")) {
 
                 std::vector<std::string> vectTemp;
-                vectTemp.push_back(entry.path());
-                std::string filenameTemp = entry.path().filename();
+                vectTemp.push_back(entry.path().string());
+                std::string filenameTemp = entry.path().filename().string();
                 size_t lastindexTemp = filenameTemp.find_last_of(".");
                 vectTemp.push_back(filenameTemp.substr(0, lastindexTemp));
-                vectTemp.push_back(entry.path().extension());
+                vectTemp.push_back(entry.path().extension().string());
 
                 filenames.push_back(vectTemp);
             }

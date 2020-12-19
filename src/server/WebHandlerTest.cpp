@@ -5,7 +5,7 @@
 #include <vector>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sqlite3.h>
+#include "sqlite3/sqlite3.h"
 
 #include "WebHandler.h"
 #include "DatabaseHandler.h"

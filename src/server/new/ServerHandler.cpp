@@ -32,7 +32,16 @@ void ServerHandler::clientHandler(int32_t sockClient)
 {
     printf("sock Client: %d\n", sockClient);
 
+    SocketCommunication* client = new SocketCommunication(sockClient);
 
+    char buff[5] = {0};
+    int ret = client->getDataBlocking(&buff, 5);
+    printf("bytes collected: %d\n", ret);
+    if(ret == -1) {
+        printf("recv failed: %d\n", WSAGetLastError());
+    }
+    printf("data: %s\n", buff);
+    client->sendData(buff, 5);
 
     printf("Disconnecting client.\n");
     tcpServer->disconnectAClient(sockClient);

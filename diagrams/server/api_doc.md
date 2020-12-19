@@ -166,3 +166,21 @@ response: a json file
 ```
 
 <br>
+
+## Malformed request
+
+When a malformed request occur (e.g. parameters missing, POST used instead of GET, ...), a generic error message is sent.
+
+response: a json file
+
+```json
+{
+    "code": "integer",
+    "message": "Bad request"
+}
+```
+```
+"code" will never be 0
+```
+
+<br>
