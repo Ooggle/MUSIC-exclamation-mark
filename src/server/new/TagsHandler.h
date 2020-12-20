@@ -23,6 +23,8 @@ class TagsHandler
         int getSpecificTag(std::string filename, std::string tagName, std::string *value);
 
         int getTags(std::string filename, std::vector<std::pair<std::string, std::string>> &values);
+
+        int getImageCover(std::string filename, uint8_t **data, int *dataSize);
 };
 
 #endif

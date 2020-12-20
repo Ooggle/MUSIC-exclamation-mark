@@ -9,14 +9,14 @@ int main(int argc, char **argv) {
 
     std::vector<std::pair<std::string, std::string>> res;
 
-    if(tagsHandler->getTags("/home/ooggle/code/c++/MUSIC-exclamation-mark/src/server/tests/musics/Sonic Generations 20 Years of Sonic Music [FLAC]/02. Angel Island - Act I (Sonic the Hedgehog 3).flac", res) == 0) {
-        for(int i = 0; i < res.size(); i++) {
-            printf("%s: %s\n", res[i].first.c_str(), res[i].second.c_str());
-        }
-        
-    }
+    uint8_t *data;
+    int dataSize = 0;
 
+    printf("ret: %d\n", tagsHandler->getImageCover("/home/ooggle/code/c++/MUSIC-exclamation-mark/src/server/tests/musics/Sonic Generations 20 Years of Sonic Music [FLAC]/01. SEGA.flac", &data, &dataSize));
 
+    FILE* image_file = fopen("image.jpg", "wb");
+    int result = fwrite(data, dataSize, 1, image_file);
+    fclose(image_file);
 
     delete tagsHandler;
 

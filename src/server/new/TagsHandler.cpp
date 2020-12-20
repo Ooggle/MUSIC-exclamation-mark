@@ -64,3 +64,28 @@ int TagsHandler::getTags(std::string filename, std::vector<std::pair<std::string
 
     return ret;
 }
+
+int TagsHandler::getImageCover(std::string filename, uint8_t **data, int *dataSize) {
+    AVFormatContext* av_format_cx = avformat_alloc_context();
+    AVPacket pkt;
+    int ret = 0;
+    printf("hey\n");
+
+    ret = avformat_open_input(&av_format_cx, filename.c_str(), NULL, NULL);
+    if(ret != 0) {
+        ret = -1;
+    }
+
+    if(ret == 0) {
+        ret = av_read_frame(av_format_cx, &pkt);
+
+        if(pkt.stream_index > 0) {
+            *data = pkt.data;
+            *dataSize = pkt.size;
+        } else {
+            ret = -1;
+        }
+    }
+
+    return ret;
+}
