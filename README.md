@@ -13,7 +13,7 @@ Listen your music everywhere without using a single Mb of storage.
 Linux MUSIC! server: 50%   
 Android player: 30%   
 PC player: 5%   
-Web player: currently developed by @Meatreed   
+Web player: currently developed by [MeatReed](https://github.com/MeatReed)   
 
 For now, it will support mp3, flac and ogg formats. Maybe i will add more in the future. Also, everything is WIP for the moment.
 
