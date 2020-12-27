@@ -3,6 +3,10 @@
 
 #include <string>
 #include <vector>
+#ifndef INT64_C
+#define INT64_C(c) (c ## LL)
+#define UINT64_C(c) (c ## ULL)
+#endif
 extern "C" {
     #include <libavformat/avformat.h>
     #include <libavutil/dict.h>
@@ -24,7 +28,7 @@ class TagsHandler
 
         int getTags(std::string filename, std::vector<std::pair<std::string, std::string>> &values);
 
-        int getImageCover(std::string filename, uint8_t **data, int *dataSize);
+        int getCoverImage(std::string filename, uint8_t **data, int *dataSize);
 };
 
 #endif
