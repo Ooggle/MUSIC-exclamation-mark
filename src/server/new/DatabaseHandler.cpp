@@ -171,16 +171,9 @@ int DatabaseHandler::createTables()
     return 0;
 }
 
-int DatabaseHandler::addMusicsforUser(std::string path, std::string username)
+/* int DatabaseHandler::addMusicsforUser(std::string path, std::string username)
 {
     std::vector<std::vector<std::string>> filenames = getFilesInDirectory(path);
-
-    // print vector of strings
-    /* printf("\n      -- ALL FILES --\n");
-    for(int i = 0; i < filenames.size(); i++)
-    { 
-        printf("%s\n", filenames[i].c_str());
-    } */
 
     // Verify username
     int username_id = getUserID(username);
@@ -193,13 +186,13 @@ int DatabaseHandler::addMusicsforUser(std::string path, std::string username)
         addMusicforUser(filenames[i], username);
 
     return 0;
-}
+} */
 
 /*
  * Consider using ffprobe:
  * ffprobe -v quiet -print_format json -loglevel fatal -show_error -show_format "path/to/file"
 */
-int DatabaseHandler::addMusicforUser(std::vector<std::string> file, std::string username)
+/* int DatabaseHandler::addMusicforUser(std::vector<std::string> file, std::string username)
 {
 
     // Verify username
@@ -293,35 +286,6 @@ int DatabaseHandler::addMusicforUser(std::vector<std::string> file, std::string 
             sqlite3_bind_int(stmt, 3, artistID); // artist_id
             sqlite3_bind_int(stmt, 4, fYear); // year
 
-            /* ID3v2 picture tag adding */
-
-            /* TagLib::FLAC::File myflac(file.at(0).c_str());
-
-            if(myflac.ID3v2Tag()) {
-                // Get the list of frames for a specific frame type
-                TagLib::ID3v2::FrameList img_frame_list = myflac.ID3v2Tag()->frameListMap()["APIC"];
-                //std::cout << "id3v2 tag" << std::endl;
-                if(!img_frame_list.isEmpty())
-                    //std::cout << l.front()->toString() << std::endl;
-
-                    // I really don't know why I have to do this here...
-                    img_frame_list.front()->size();
-
-                    TagLib::ID3v2::AttachedPictureFrame* apic_img = static_cast<TagLib::ID3v2::AttachedPictureFrame*>(*img_frame_list.begin());
-                    TagLib::ByteVector bytes = apic_img->picture();
-                    sqlite3_bind_blob64(stmt, 5, (const void *)bytes.data(), img_frame_list.front()->render().size(), SQLITE_TRANSIENT); */
-
-            /* That need to be changed because there is literally no check for this part */
-            /* } else{
-
-                TagLib::List<TagLib::FLAC::Picture *> piclist = myflac.pictureList();
-                TagLib::FLAC::Picture *pic = static_cast<TagLib::FLAC::Picture*>(*piclist.begin());
-
-                sqlite3_bind_blob64(stmt, 5, (const void *)pic->data().data(), pic->data().size(), SQLITE_TRANSIENT);
-
-            } */
-
-
             rc = sqlite3_step(stmt);
             if (rc != SQLITE_DONE) {
                 printf("execution failed: %s\n", sqlite3_errmsg(db));
@@ -362,7 +326,7 @@ int DatabaseHandler::addMusicforUser(std::vector<std::string> file, std::string 
     }
 
     return 0;
-}
+} */
 
 bool DatabaseHandler::isDatabaseValid()
 {
@@ -390,7 +354,7 @@ bool DatabaseHandler::isDatabaseValid()
 }
 
 
-bool DatabaseHandler::getIsDatabaseInitialised()
+/* bool DatabaseHandler::getIsDatabaseInitialised()
 {
     return isDatabaseInitialised;
 }
@@ -503,11 +467,6 @@ int DatabaseHandler::isAlbumExistForUser(std::string username, std::string album
     return returnInt;
 }
 
-sqlite3 *DatabaseHandler::getDB()
-{
-    return db;
-}
-
 int DatabaseHandler::getUserID(std::string username)
 {
     int rc, username_id;
@@ -533,6 +492,11 @@ int DatabaseHandler::getUserID(std::string username)
     }
 
     return username_id;
+} */
+
+sqlite3 *DatabaseHandler::getDB()
+{
+    return db;
 }
 
 bool DatabaseHandler::createUser(std::string username, std::string password, std::string *errMsg)
