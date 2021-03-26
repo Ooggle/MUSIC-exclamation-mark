@@ -14,19 +14,40 @@
         {
             "name": "Windows",
             "includePath": [
-                "${workspaceFolder}/**",
-                "/usr/lib/gcc/x86_64-w64-mingw32/8.3-win32/include/c++",
-                "/usr/lib/gcc/x86_64-w64-mingw32/8.3-win32/include/c++/x86_64-w64-mingw32",
-                "/usr/lib/gcc/x86_64-w64-mingw32/8.3-win32/include/c++/backward",
-                "/usr/lib/gcc/x86_64-w64-mingw32/8.3-win32/include",
-                "/usr/lib/gcc/x86_64-w64-mingw32/8.3-win32/include-fixed",
-                "/usr/lib/gcc/x86_64-w64-mingw32/8.3-win32/../../../../x86_64-w64-mingw32/include"
+                "${workspaceFolder}/**"
             ],
             "defines": [],
-            "compilerPath": "/usr/bin/x86_64-w64-mingw32-g++-win32",
-            "cStandard": "c11",
-            "cppStandard": "c++17",
+            "compilerPath": "D:/msys64/mingw64/bin/g++.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++20",
             "intelliSenseMode": "clang-x64"
+        },
+        {
+            "name": "win g++",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "windowsSdkVersion": "10.0.18362.0",
+            "compilerPath": "D:/mingw64/bin/g++.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "windows-clang-x64",
+            "compilerArgs": [],
+            "intelliSenseModeIsExplicit": true,
+            "cStandardIsExplicit": true,
+            "cppStandardIsExplicit": true,
+            "compilerPathIsExplicit": true,
+            "browse": {
+                "path": [
+                    "${workspaceFolder}/**"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            }
         }
     ],
     "version": 4

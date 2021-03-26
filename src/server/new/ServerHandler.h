@@ -9,7 +9,7 @@
 #include "platform.h"
 
 #if defined(WINDOWS)
-#include "mingw/mingw.thread.h"
+//#include "mingw/mingw.thread.h"
 #elif defined(POSIX)
 #include <thread>
 #endif

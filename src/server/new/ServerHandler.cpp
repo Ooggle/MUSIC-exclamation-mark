@@ -50,8 +50,12 @@ void ServerHandler::clientHandler(int32_t sockClient)
 
 int main()  
 {
-    int x = 10;
-    /* std::string str = "Sample String";
+    /* 
+     * compiling for Windows:
+     *  g++ -std=c++11 .\ServerHandler.cpp .\SocketCommunication.cpp .\ThreadedTcpServer.cpp -o testServer -lws2_32
+     */
+    /* int x = 10;
+    std::string str = "Sample String";
     std::thread threadObj(threadCallback, x, str);
     threadObj.join(); */
 

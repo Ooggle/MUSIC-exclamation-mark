@@ -5,19 +5,10 @@
 #include <vector>
 #include <fstream>
 #include <filesystem>
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <sqlite3.h>
-
-// taglib
-#include <taglib/tag.h>
-#include <taglib/fileref.h>
-#include <taglib/id3v2tag.h>
-#include <taglib/flacfile.h>
-#include <taglib/attachedpictureframe.h>
-#include <taglib/flacpicture.h>
 
 class DatabaseHandler {
     private:

@@ -37,7 +37,7 @@ int TagsHandler::getSpecificTag(std::string filename, std::string tagName, std::
     return ret;
 }
 
-int TagsHandler::getTags(std::string filename, std::vector<std::pair<std::string, std::string>> &values)
+int TagsHandler::getTags(std::string filename, std::vector< std::pair<std::string, std::string> > &values)
 {
     AVFormatContext* av_format_cx = avformat_alloc_context();
     AVDictionaryEntry *tag = NULL;
@@ -70,7 +70,6 @@ int TagsHandler::getCoverImage(std::string filename, uint8_t **data, int *dataSi
     AVFormatContext* av_format_cx = avformat_alloc_context();
     AVPacket pkt;
     int ret = 0;
-    printf("hey\n");
 
     ret = avformat_open_input(&av_format_cx, filename.c_str(), NULL, NULL);
     if(ret != 0) {
