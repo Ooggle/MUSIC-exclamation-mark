@@ -2,7 +2,8 @@
 
 TagsHandler::TagsHandler()
 {
-    av_register_all();
+    // No more needed in ffmpeg 4.0
+    //av_register_all();
 }
 
 TagsHandler::~TagsHandler()
@@ -45,10 +46,10 @@ int TagsHandler::getTags(std::string filename, std::vector< std::pair<std::strin
 
     ret = avformat_open_input(&av_format_cx, filename.c_str(), NULL, NULL);
     if(ret != 0) {
-       /*  printf("Couldn't open file\n");
+        printf("Couldn't open file\n");
         char buff[255];
         av_strerror(ret, buff, 255);
-        printf("err: %s\n", buff); */
+        printf("err: %s\n", buff);
         ret = -1;
     }
 

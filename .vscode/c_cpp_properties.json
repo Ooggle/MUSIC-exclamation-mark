@@ -20,7 +20,10 @@
             "compilerPath": "D:/msys64/mingw64/bin/g++.exe",
             "cStandard": "c17",
             "cppStandard": "c++20",
-            "intelliSenseMode": "clang-x64"
+            "intelliSenseMode": "clang-x64",
+            "compilerArgs": [
+                "-std=c++17"
+            ]
         },
         {
             "name": "win g++",
@@ -33,15 +36,11 @@
                 "_UNICODE"
             ],
             "windowsSdkVersion": "10.0.18362.0",
-            "compilerPath": "D:/mingw64/bin/g++.exe",
+            "compilerPath": "D:/msys64/mingw64/bin/g++.exe",
             "cStandard": "c17",
             "cppStandard": "c++17",
             "intelliSenseMode": "windows-clang-x64",
             "compilerArgs": [],
-            "intelliSenseModeIsExplicit": true,
-            "cStandardIsExplicit": true,
-            "cppStandardIsExplicit": true,
-            "compilerPathIsExplicit": true,
             "browse": {
                 "path": [
                     "${workspaceFolder}/**"

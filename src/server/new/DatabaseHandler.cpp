@@ -6,47 +6,16 @@ DatabaseHandler::DatabaseHandler(std::string DatabasePath)
 
     if(sqlite3_open(DatabasePath.c_str(), &db)) {
         fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
-        isDatabaseInitialised = false;
+        databaseInitialised = false;
     } else {
         fprintf(stderr, "Opened database successfully\n");
-        isDatabaseInitialised = true;
+        databaseInitialised = true;
     }
 }
 
 DatabaseHandler::~DatabaseHandler()
 {
     sqlite3_close(db);
-}
-
-std::vector<std::vector<std::string>> DatabaseHandler::getFilesInDirectory(std::string path)
-{
-    std::vector<std::vector<std::string>> filenames;
-    int i = 0;
-
-    for(const auto & entry : std::filesystem::directory_iterator(path))
-    {
-        //std::cout << entry.path() << ", directory: " << entry.is_directory() << std::endl;
-        if(entry.is_directory()) {
-            std::vector<std::vector<std::string>> filenamesTemp = getFilesInDirectory(entry.path().string());
-            filenames.insert(filenames.end(), filenamesTemp.begin(), filenamesTemp.end());
-        } else {
-            if((entry.path().extension() == ".mp3") ||
-            (entry.path().extension() == ".ogg") ||
-            (entry.path().extension() == ".flac")) {
-
-                std::vector<std::string> vectTemp;
-                vectTemp.push_back(entry.path().string());
-                std::string filenameTemp = entry.path().filename().string();
-                size_t lastindexTemp = filenameTemp.find_last_of(".");
-                vectTemp.push_back(filenameTemp.substr(0, lastindexTemp));
-                vectTemp.push_back(entry.path().extension().string());
-
-                filenames.push_back(vectTemp);
-            }
-        }
-        i += 1;
-    }
-    return filenames;
 }
 
 int DatabaseHandler::createTables()
@@ -171,9 +140,10 @@ int DatabaseHandler::createTables()
     return 0;
 }
 
-/* int DatabaseHandler::addMusicsforUser(std::string path, std::string username)
+int DatabaseHandler::addMusicsforUser(std::string path, std::string username)
 {
-    std::vector<std::vector<std::string>> filenames = getFilesInDirectory(path);
+    LocalFilesHandler *localFiles = new LocalFilesHandler();
+    std::vector<std::vector<std::string>> filenames = localFiles->getFilesInDirectory(path);
 
     // Verify username
     int username_id = getUserID(username);
@@ -186,7 +156,7 @@ int DatabaseHandler::createTables()
         addMusicforUser(filenames[i], username);
 
     return 0;
-} */
+}
 
 /*
  * Consider using ffprobe:
@@ -494,10 +464,10 @@ int DatabaseHandler::getUserID(std::string username)
     return username_id;
 } */
 
-sqlite3 *DatabaseHandler::getDB()
+/* sqlite3 *DatabaseHandler::getDB()
 {
     return db;
-}
+} */
 
 bool DatabaseHandler::createUser(std::string username, std::string password, std::string *errMsg)
 {

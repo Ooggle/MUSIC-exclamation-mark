@@ -58,5 +58,6 @@
         "mutex": "cpp",
         "iomanip": "cpp",
         "cinttypes": "cpp"
-    }
+    },
+    "C_Cpp.errorSquiggles": "Enabled"
 }

@@ -12,13 +12,10 @@
 #include <stdlib.h>
 #include <sqlite3.h>
 
-#include "localFilesHandler.h"
-
 class DatabaseHandler {
     private:
         sqlite3 *db;
-        bool databaseInitialised;
-        int dbVersion;
+        bool isDatabaseInitialised;
         
     public:
         DatabaseHandler(std::string DatabasePath);
@@ -36,7 +33,7 @@ class DatabaseHandler {
         int isArtistExistForUser(std::string username, std::string artist);
         int isAlbumExistForUser(std::string username, std::string album_name, int album_year);
         int getUserID(std::string username);
-        // sqlite3 *getDB();
+        sqlite3 *getDB();
 
         bool createUser(std::string username, std::string password, std::string *errMsg);
         bool getUserInfos(std::string username, int *id, std::vector<std::string> *directories, std::string *errMsg);

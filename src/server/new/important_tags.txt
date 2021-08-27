@@ -1,0 +1,15 @@
+album = Sonic Generations: 20 Years of Sonic Music
+album_artist = SEGA
+artist = SEGA
+comment = www.sittingonclouds.net
+composer = SEGA
+date = 2011
+genre = Game Soundtrack
+organization = SEGA
+release date = Nov 04, 2011
+title = Mushroom Hill - Act I (Sonic & Knuckles)
+disctotal = 1
+disc = 1
+tracktotal = 23
+track = 3
+www = www.sittingonclouds.net
