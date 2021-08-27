@@ -35,7 +35,7 @@ int main(int argc, char **argv)
     wchar_t filename[] = L"D:/Ooggle/DL Files/_Pers/CODE/c++/MUSIC-exclamation-mark/src/server/tests/musics/cosMo@暴走P feat_初音ミク/Re_Start/04 千本桜.mp3";
 
     printf("ret: %d\n", tagsHandler->getTags("D:/Ooggle/DL Files/_Pers/CODE/c++/MUSIC-exclamation-mark/src/server/tests/musics/cosMo@暴走P feat_初音ミク/Re_Start/04 千本桜.mp3", res));
-    for (int i = 0; i < res.size(); i++)
+    for(int i = 0; i < res.size(); i++)
     {
         printf("%s = %s\n", res[i].first.c_str(), res[i].second.c_str());
         outfile.write(res[i].second.c_str(), res[i].second.length());

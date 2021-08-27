@@ -6,8 +6,6 @@
 
 #include "localFilesHandler.h"
 
-namespace fs = std::filesystem;
-
 int main() {
     std::ofstream outfile("test.txt", std::ofstream::out);
     std::string path = "D:/Ooggle/DL Files/_Pers/CODE/c++/MUSIC-exclamation-mark/src/server/tests/musics/";

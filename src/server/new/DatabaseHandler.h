@@ -13,6 +13,7 @@
 #include <sqlite3.h>
 
 #include "localFilesHandler.h"
+#include "TagsHandler.h"
 
 class DatabaseHandler {
     private:
@@ -27,14 +28,15 @@ class DatabaseHandler {
         // Create the server databases.
         int createTables();
         // Init the server databases.
-        int addMusicsforUser(std::string path, std::string username);
-        int addMusicforUser(std::string file, std::string username);
+        int addMusicsforUser(std::string path, int user_id);
+        int addMusicforUser(std::vector<std::string> file, int user_id);
         bool isDatabaseValid();
 
         bool isDatabaseInitialised();
-        int isMusicExistForUser(std::string username, std::string genre, int track_number, std::string title, std::string artist, int year);
-        int isArtistExistForUser(std::string username, std::string artist);
-        int isAlbumExistForUser(std::string username, std::string album_name, int album_year);
+        int isMusicExistForUser(int user_id, std::string genre, int track_number, std::string title, std::string artist, int year);
+        int isArtistExistForUser(int user_id, std::string artist);
+        int isAlbumExistForUser(int user_id, std::string album_name, std::string album_artist, int album_year);
+        int isUserIdExists(int user_id);
         int getUserID(std::string username);
         // sqlite3 *getDB();
 

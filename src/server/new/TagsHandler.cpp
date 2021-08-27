@@ -15,6 +15,7 @@ int TagsHandler::getSpecificTag(std::string filename, std::string tagName, std::
 {
     AVFormatContext* av_format_cx = avformat_alloc_context();
     AVDictionaryEntry *tag = NULL;
+    *value = "";
     int ret = 0;
 
     ret = avformat_open_input(&av_format_cx, filename.c_str(), NULL, NULL);
